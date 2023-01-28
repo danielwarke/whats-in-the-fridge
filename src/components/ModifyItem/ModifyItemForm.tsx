@@ -55,7 +55,6 @@ const ModifyItemForm: FC<{
         <IonDatetime
           id="datetime"
           presentation="date"
-          min={initialExpirationDate ? undefined : currentDate}
           value={expirationDate}
           onIonChange={(e) => setExpirationDate(e.target.value as string)}
           showDefaultButtons

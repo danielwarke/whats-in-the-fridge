@@ -13,6 +13,7 @@ import {
 } from "@ionic/react";
 import { trashOutline } from "ionicons/icons";
 import { api } from "../../utils/api";
+import { getExpirationStatusColor, getExpirationText } from "../../utils/date";
 
 const ItemRenderer: FC<{
   fridgeItem: FridgeItem;
@@ -61,8 +62,8 @@ const ItemRenderer: FC<{
       </IonItemOptions>
       <IonItem button onClick={onClick}>
         <IonLabel>{fridgeItem.name}</IonLabel>
-        <IonText>
-          expires on {fridgeItem.expirationDate.toLocaleDateString()}
+        <IonText color={getExpirationStatusColor(fridgeItem.expirationDate)}>
+          {getExpirationText(fridgeItem.expirationDate)}
         </IonText>
       </IonItem>
     </IonItemSliding>

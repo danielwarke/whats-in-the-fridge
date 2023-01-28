@@ -14,7 +14,7 @@ export const fridgeRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        expirationDate: z.date().min(new Date()),
+        expirationDate: z.date(),
       })
     )
     .mutation(({ input, ctx }) => {
@@ -30,7 +30,7 @@ export const fridgeRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         name: z.string(),
-        expirationDate: z.date().min(new Date()),
+        expirationDate: z.date(),
       })
     )
     .mutation(async ({ input, ctx }) => {
