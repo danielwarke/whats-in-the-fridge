@@ -25,7 +25,7 @@ import type { FridgeItem } from "@prisma/client";
 setupIonicReact();
 
 const ItemListPage: FC = () => {
-  const [presentToast] = useIonToast();
+  const [presentToast, dismissToast] = useIonToast();
   const util = api.useContext();
   const { data: fridgeItems = [] } = api.fridge.listItems.useQuery();
 
@@ -38,7 +38,8 @@ const ItemListPage: FC = () => {
   const deleteFridgeItemMutation = api.fridge.deleteItem.useMutation({
     onSuccess: async (deletedItem) => {
       await util.fridge.listItems.invalidate();
-      await presentToast({
+      await dismissToast();
+      void presentToast({
         message: `Removed ${deletedItem.name}`,
         buttons: [
           {
@@ -74,9 +75,17 @@ const ItemListPage: FC = () => {
     );
   }, [fridgeItems, search]);
 
-  function handleModifyModalClosed() {
+  function handleModifyModalClosed(successMessage?: string) {
     setIsModifyModalOpen(false);
-    setTimeout(() => setSelectedFridgeItem(undefined), 100);
+    setTimeout(() => {
+      setSelectedFridgeItem(undefined);
+      if (successMessage) {
+        void presentToast({
+          message: successMessage,
+          duration: 2000,
+        });
+      }
+    }, 100);
   }
 
   return (
@@ -95,7 +104,7 @@ const ItemListPage: FC = () => {
           showClearButton="focus"
         />
         {fridgeItems.length === 0 && (
-          <IonItem lines="none">
+          <IonItem lines="none" className="mt-3">
             Nothing is in the fridge! <br />
             Add some groceries by clicking the blue button below.
           </IonItem>
@@ -103,7 +112,10 @@ const ItemListPage: FC = () => {
         {fridgeItems.length > 0 &&
           !!search &&
           filteredFridgeItems.length === 0 && (
-            <IonItem lines="none">{`Couldn't find ${search} in the fridge`}</IonItem>
+            <IonItem
+              lines="none"
+              className="mt-3"
+            >{`Couldn't find ${search} in the fridge`}</IonItem>
           )}
         <IonList>
           {filteredFridgeItems.map((fridgeItem) => (

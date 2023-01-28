@@ -8,14 +8,14 @@ import {
 } from "@ionic/react";
 import { api } from "../../utils/api";
 import ModifyItemForm from "./ModifyItemForm";
-import type { FC, MouseEventHandler } from "react";
+import type { FC } from "react";
 import React from "react";
 import type { FridgeItem } from "@prisma/client";
 
 const ModifyItemPage: FC<{
   fridgeItem?: FridgeItem;
-  onCancel: MouseEventHandler;
-  onSave: () => void;
+  onCancel: () => void;
+  onSave: (successMessage: string) => void;
 }> = ({ fridgeItem, onCancel, onSave }) => {
   const util = api.useContext();
 
@@ -45,7 +45,9 @@ const ModifyItemPage: FC<{
       });
     }
 
-    onSave();
+    onSave(
+      fridgeItem ? `Updated ${itemName}` : `Added ${itemName} to the fridge`
+    );
   }
 
   return (
