@@ -56,7 +56,7 @@ const ModifyItemPage: FC<{
             <IonButton onClick={onCancel}>Cancel</IonButton>
           </IonButtons>
           <IonTitle>
-            {fridgeItem ? "Update Fridge Item" : "Add Item to Fridge"}
+            {fridgeItem ? "Update Item" : "Add Item to Fridge"}
           </IonTitle>
         </IonToolbar>
       </IonHeader>

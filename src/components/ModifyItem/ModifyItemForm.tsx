@@ -11,8 +11,6 @@ import {
   IonModal,
 } from "@ionic/react";
 
-const currentDate = new Date().toISOString();
-
 const ModifyItemForm: FC<{
   initialName?: string;
   initialExpirationDate?: string;
@@ -44,7 +42,7 @@ const ModifyItemForm: FC<{
         </IonItem>
         <IonButton
           expand="block"
-          className="px-3"
+          className="mt-3 px-3"
           disabled={!itemName || !expirationDate}
           onClick={saveHandler}
         >

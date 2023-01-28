@@ -1,4 +1,5 @@
-import React, { FC, useMemo, useRef, useState } from "react";
+import type { FC } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { api } from "../../utils/api";
 import {
   IonApp,
@@ -14,20 +15,57 @@ import {
   IonTitle,
   IonToolbar,
   setupIonicReact,
+  useIonToast,
 } from "@ionic/react";
 import ItemRenderer from "./ItemRenderer";
 import { snowOutline } from "ionicons/icons";
 import ModifyItemPage from "../ModifyItem/ModifyItemPage";
-import { FridgeItem } from "@prisma/client";
+import type { FridgeItem } from "@prisma/client";
 
 setupIonicReact();
 
 const ItemListPage: FC = () => {
+  const [presentToast] = useIonToast();
+  const util = api.useContext();
+  const { data: fridgeItems = [] } = api.fridge.listItems.useQuery();
+
+  const createFridgeItemMutation = api.fridge.addItem.useMutation({
+    onSuccess: async () => {
+      await util.fridge.listItems.invalidate();
+    },
+  });
+
+  const deleteFridgeItemMutation = api.fridge.deleteItem.useMutation({
+    onSuccess: async (deletedItem) => {
+      await util.fridge.listItems.invalidate();
+      await presentToast({
+        message: `Removed ${deletedItem.name}`,
+        buttons: [
+          {
+            text: "Undo",
+            handler: () => {
+              createFridgeItemMutation.mutate({
+                name: deletedItem.name,
+                expirationDate: deletedItem.expirationDate,
+              });
+            },
+          },
+        ],
+        duration: 5000,
+      });
+    },
+  });
+
+  const deleteFridgeItem = useCallback(
+    (itemId: string) => {
+      deleteFridgeItemMutation.mutate({ itemId });
+    },
+    [deleteFridgeItemMutation]
+  );
+
   const [search, setSearch] = useState("");
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
   const [selectedFridgeItem, setSelectedFridgeItem] = useState<FridgeItem>();
-
-  const { data: fridgeItems = [] } = api.fridge.listItems.useQuery();
 
   const filteredFridgeItems = useMemo(() => {
     if (!search) return fridgeItems;
@@ -38,7 +76,7 @@ const ItemListPage: FC = () => {
 
   function handleModifyModalClosed() {
     setIsModifyModalOpen(false);
-    setSelectedFridgeItem(undefined);
+    setTimeout(() => setSelectedFridgeItem(undefined), 100);
   }
 
   return (
@@ -76,6 +114,7 @@ const ItemListPage: FC = () => {
                 setSelectedFridgeItem(fridgeItem);
                 setIsModifyModalOpen(true);
               }}
+              onDelete={deleteFridgeItem}
             />
           ))}
         </IonList>
