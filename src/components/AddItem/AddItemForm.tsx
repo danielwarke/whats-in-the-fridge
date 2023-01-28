@@ -33,12 +33,13 @@ const AddItemForm: FC<{
             onIonChange={(e) => setItemName(e.target.value as string)}
           />
         </IonItem>
-        <IonItem>
+        <IonItem lines="none">
           <IonLabel>Expiration Date</IonLabel>
           <IonDatetimeButton datetime="datetime" />
         </IonItem>
         <IonButton
           expand="block"
+          className="px-3"
           disabled={!itemName || !expirationDate}
           onClick={saveHandler}
         >

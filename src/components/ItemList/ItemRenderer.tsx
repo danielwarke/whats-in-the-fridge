@@ -28,7 +28,7 @@ const ItemRenderer: FC<{ fridgeItem: FridgeItem }> = ({ fridgeItem }) => {
     onSuccess: async () => {
       await util.fridge.listItems.invalidate();
       await presentToast({
-        message: `${fridgeItem.name} was thrown out`,
+        message: `Threw away ${fridgeItem.name}`,
         buttons: [
           {
             text: "Undo",

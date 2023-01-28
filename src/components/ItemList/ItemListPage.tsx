@@ -1,4 +1,4 @@
-import React, { FC, useRef } from "react";
+import React, { FC, useMemo, useRef, useState } from "react";
 import { api } from "../../utils/api";
 import {
   IonApp,
@@ -7,8 +7,10 @@ import {
   IonFabButton,
   IonHeader,
   IonIcon,
+  IonItem,
   IonList,
   IonModal,
+  IonSearchbar,
   IonTitle,
   IonToolbar,
   setupIonicReact,
@@ -21,8 +23,16 @@ setupIonicReact();
 
 const ItemListPage: FC = () => {
   const modal = useRef<HTMLIonModalElement>(null);
+  const [search, setSearch] = useState("");
 
   const { data: fridgeItems = [] } = api.fridge.listItems.useQuery();
+
+  const filteredFridgeItems = useMemo(() => {
+    if (!search) return fridgeItems;
+    return fridgeItems.filter((fridgeItem) =>
+      fridgeItem.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [fridgeItems, search]);
 
   return (
     <IonApp>
@@ -32,8 +42,26 @@ const ItemListPage: FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
+        <IonSearchbar
+          value={search}
+          onIonChange={(e) => setSearch(e.target.value as string)}
+          disabled={fridgeItems.length === 0}
+          placeholder="Search the fridge"
+          showClearButton="focus"
+        />
+        {fridgeItems.length === 0 && (
+          <IonItem lines="none">
+            Nothing is in the fridge! <br />
+            Add some groceries by clicking the blue button below.
+          </IonItem>
+        )}
+        {fridgeItems.length > 0 &&
+          !!search &&
+          filteredFridgeItems.length === 0 && (
+            <IonItem lines="none">{`Couldn't find ${search} in the fridge`}</IonItem>
+          )}
         <IonList>
-          {fridgeItems.map((fridgeItem) => (
+          {filteredFridgeItems.map((fridgeItem) => (
             <ItemRenderer key={fridgeItem.id} fridgeItem={fridgeItem} />
           ))}
         </IonList>
