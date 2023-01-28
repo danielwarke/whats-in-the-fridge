@@ -17,13 +17,15 @@ import {
 } from "@ionic/react";
 import ItemRenderer from "./ItemRenderer";
 import { snowOutline } from "ionicons/icons";
-import AddItemPage from "../AddItem/AddItemPage";
+import ModifyItemPage from "../ModifyItem/ModifyItemPage";
+import { FridgeItem } from "@prisma/client";
 
 setupIonicReact();
 
 const ItemListPage: FC = () => {
-  const modal = useRef<HTMLIonModalElement>(null);
   const [search, setSearch] = useState("");
+  const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+  const [selectedFridgeItem, setSelectedFridgeItem] = useState<FridgeItem>();
 
   const { data: fridgeItems = [] } = api.fridge.listItems.useQuery();
 
@@ -33,6 +35,11 @@ const ItemListPage: FC = () => {
       fridgeItem.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [fridgeItems, search]);
+
+  function handleModifyModalClosed() {
+    setIsModifyModalOpen(false);
+    setSelectedFridgeItem(undefined);
+  }
 
   return (
     <IonApp>
@@ -62,18 +69,26 @@ const ItemListPage: FC = () => {
           )}
         <IonList>
           {filteredFridgeItems.map((fridgeItem) => (
-            <ItemRenderer key={fridgeItem.id} fridgeItem={fridgeItem} />
+            <ItemRenderer
+              key={fridgeItem.id}
+              fridgeItem={fridgeItem}
+              onClick={() => {
+                setSelectedFridgeItem(fridgeItem);
+                setIsModifyModalOpen(true);
+              }}
+            />
           ))}
         </IonList>
         <IonFab slot="fixed" vertical="bottom" horizontal="end">
-          <IonFabButton id="open-modal">
+          <IonFabButton onClick={() => setIsModifyModalOpen(true)}>
             <IonIcon icon={snowOutline} />
           </IonFabButton>
         </IonFab>
-        <IonModal ref={modal} trigger="open-modal">
-          <AddItemPage
-            onCancel={() => modal.current?.dismiss()}
-            onSave={() => modal.current?.dismiss()}
+        <IonModal isOpen={isModifyModalOpen}>
+          <ModifyItemPage
+            fridgeItem={selectedFridgeItem}
+            onCancel={handleModifyModalClosed}
+            onSave={handleModifyModalClosed}
           />
         </IonModal>
       </IonContent>

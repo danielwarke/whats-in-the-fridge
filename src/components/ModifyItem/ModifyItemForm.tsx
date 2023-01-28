@@ -1,4 +1,5 @@
-import { FC, useState } from "react";
+import type { FC } from "react";
+import { useState } from "react";
 import {
   IonButton,
   IonContent,
@@ -12,11 +13,15 @@ import {
 
 const currentDate = new Date().toISOString();
 
-const AddItemForm: FC<{
+const ModifyItemForm: FC<{
+  initialName?: string;
+  initialExpirationDate?: string;
   onSave: (itemName: string, expirationDate: string) => void;
-}> = ({ onSave }) => {
-  const [itemName, setItemName] = useState("");
-  const [expirationDate, setExpirationDate] = useState("");
+}> = ({ initialName, initialExpirationDate, onSave }) => {
+  const [itemName, setItemName] = useState(initialName || "");
+  const [expirationDate, setExpirationDate] = useState(
+    initialExpirationDate || ""
+  );
 
   function saveHandler() {
     onSave(itemName, expirationDate);
@@ -50,7 +55,7 @@ const AddItemForm: FC<{
         <IonDatetime
           id="datetime"
           presentation="date"
-          min={currentDate}
+          min={initialExpirationDate ? undefined : currentDate}
           value={expirationDate}
           onIonChange={(e) => setExpirationDate(e.target.value as string)}
           showDefaultButtons
@@ -60,4 +65,4 @@ const AddItemForm: FC<{
   );
 };
 
-export default AddItemForm;
+export default ModifyItemForm;

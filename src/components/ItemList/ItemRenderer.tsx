@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import type { FC, MouseEventHandler } from "react";
 import React, { useCallback } from "react";
 import type { FridgeItem } from "@prisma/client";
 import {
@@ -14,7 +14,10 @@ import {
 import { trashOutline } from "ionicons/icons";
 import { api } from "../../utils/api";
 
-const ItemRenderer: FC<{ fridgeItem: FridgeItem }> = ({ fridgeItem }) => {
+const ItemRenderer: FC<{
+  fridgeItem: FridgeItem;
+  onClick: MouseEventHandler;
+}> = ({ fridgeItem, onClick }) => {
   const [presentToast] = useIonToast();
   const util = api.useContext();
 
@@ -28,7 +31,7 @@ const ItemRenderer: FC<{ fridgeItem: FridgeItem }> = ({ fridgeItem }) => {
     onSuccess: async () => {
       await util.fridge.listItems.invalidate();
       await presentToast({
-        message: `Threw away ${fridgeItem.name}`,
+        message: `Removed ${fridgeItem.name}`,
         buttons: [
           {
             text: "Undo",
@@ -56,7 +59,7 @@ const ItemRenderer: FC<{ fridgeItem: FridgeItem }> = ({ fridgeItem }) => {
           <IonIcon slot="icon-only" icon={trashOutline} />
         </IonItemOption>
       </IonItemOptions>
-      <IonItem>
+      <IonItem button onClick={onClick}>
         <IonLabel>{fridgeItem.name}</IonLabel>
         <IonText>
           expires on {fridgeItem.expirationDate.toLocaleDateString()}
