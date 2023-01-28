@@ -45,7 +45,7 @@ const ItemListPage: FC = () => {
     <IonApp>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>{"What's in the Fridge?"}</IonTitle>
+          <IonTitle>{"🍕 What's in the Fridge?"}</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
