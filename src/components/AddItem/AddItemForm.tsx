@@ -4,13 +4,10 @@ import {
   IonContent,
   IonDatetime,
   IonDatetimeButton,
-  IonHeader,
   IonInput,
   IonItem,
   IonLabel,
   IonModal,
-  IonTitle,
-  IonToolbar,
 } from "@ionic/react";
 
 const currentDate = new Date().toISOString();
@@ -27,11 +24,6 @@ const AddItemForm: FC<{
 
   return (
     <>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Add Item to Fridge</IonTitle>
-        </IonToolbar>
-      </IonHeader>
       <IonContent className="ion-padding">
         <IonItem>
           <IonLabel position="floating">Item name</IonLabel>

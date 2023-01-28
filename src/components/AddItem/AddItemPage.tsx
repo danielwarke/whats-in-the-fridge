@@ -1,16 +1,24 @@
-import { NextPage } from "next";
-import { IonApp, IonLoading, setupIonicReact } from "@ionic/react";
+import {
+  IonButton,
+  IonButtons,
+  IonHeader,
+  IonLoading,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/react";
 import { api } from "../../utils/api";
 import AddItemForm from "./AddItemForm";
-import { useRouter } from "next/router";
+import React, { FC, MouseEventHandler } from "react";
 
-setupIonicReact();
+const AddItemPage: FC<{
+  onCancel: MouseEventHandler;
+  onSave: () => void;
+}> = ({ onCancel, onSave }) => {
+  const util = api.useContext();
 
-const AddItemPage: NextPage = () => {
-  const router = useRouter();
   const addItemMutation = api.fridge.addItem.useMutation({
     onSuccess: async () => {
-      await router.push("/");
+      await util.fridge.listItems.invalidate();
     },
   });
 
@@ -19,13 +27,22 @@ const AddItemPage: NextPage = () => {
       name: itemName,
       expirationDate: new Date(expirationDate),
     });
+    onSave();
   }
 
   return (
-    <IonApp>
+    <>
+      <IonHeader>
+        <IonToolbar>
+          <IonButtons slot="start">
+            <IonButton onClick={onCancel}>Cancel</IonButton>
+          </IonButtons>
+          <IonTitle>Add Item to Fridge</IonTitle>
+        </IonToolbar>
+      </IonHeader>
       <AddItemForm onSave={addItemHandler} />
       <IonLoading isOpen={addItemMutation.isLoading} />
-    </IonApp>
+    </>
   );
 };
 
