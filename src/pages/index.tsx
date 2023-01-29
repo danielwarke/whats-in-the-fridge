@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
-import { FC } from "react";
+import type { FC } from "react";
 
 const ItemList = dynamic(() => import("../components/ItemList/ItemListPage"), {
   ssr: false,
