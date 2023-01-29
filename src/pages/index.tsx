@@ -2,6 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
+import { FC } from "react";
 
 const ItemList = dynamic(() => import("../components/ItemList/ItemListPage"), {
   ssr: false,
@@ -12,8 +13,6 @@ const Welcome = dynamic(() => import("../components/WelcomePage"), {
 });
 
 const Home: NextPage = () => {
-  const { data: sessionData } = useSession();
-
   return (
     <>
       <Head>
@@ -45,9 +44,16 @@ const Home: NextPage = () => {
         <meta name="msapplication-TileColor" content="#da532c" />
         <meta name="theme-color" content="#ffffff" />
       </Head>
-      <main>{sessionData ? <ItemList /> : <Welcome />}</main>
+      <main>
+        <RenderAppContent />
+      </main>
     </>
   );
+};
+
+const RenderAppContent: FC = () => {
+  const { data: sessionData } = useSession();
+  return sessionData ? <ItemList /> : <Welcome />;
 };
 
 export default Home;
