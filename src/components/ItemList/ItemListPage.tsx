@@ -3,6 +3,8 @@ import React, { useCallback, useMemo, useState } from "react";
 import { api } from "../../utils/api";
 import {
   IonApp,
+  IonButton,
+  IonButtons,
   IonContent,
   IonFab,
   IonFabButton,
@@ -12,6 +14,7 @@ import {
   IonList,
   IonModal,
   IonSearchbar,
+  IonText,
   IonTitle,
   IonToolbar,
   setupIonicReact,
@@ -21,6 +24,7 @@ import ItemRenderer from "./ItemRenderer";
 import { snowOutline } from "ionicons/icons";
 import ModifyItemPage from "../ModifyItem/ModifyItemPage";
 import type { FridgeItem } from "@prisma/client";
+import { signOut } from "next-auth/react";
 
 setupIonicReact();
 
@@ -59,7 +63,7 @@ const ItemListPage: FC = () => {
 
   const deleteFridgeItem = useCallback(
     (itemId: string) => {
-      deleteFridgeItemMutation.mutate({ itemId });
+      deleteFridgeItemMutation.mutate({ id: itemId });
     },
     [deleteFridgeItemMutation]
   );
@@ -93,6 +97,9 @@ const ItemListPage: FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonTitle>{"🍕 What's in the Fridge?"}</IonTitle>
+          <IonButtons slot="end">
+            <IonButton onClick={() => void signOut()}>Sign out</IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
@@ -105,8 +112,10 @@ const ItemListPage: FC = () => {
         />
         {fridgeItems.length === 0 && (
           <IonItem lines="none" className="mt-3">
-            Nothing is in the fridge! <br />
-            Add some groceries by clicking the blue button below.
+            <IonText>
+              <h2>Nothing is in the fridge!</h2>
+              <h4>Add some groceries by clicking the blue button below.</h4>
+            </IonText>
           </IonItem>
         )}
         {fridgeItems.length > 0 &&
@@ -138,7 +147,7 @@ const ItemListPage: FC = () => {
         <IonModal isOpen={isModifyModalOpen}>
           <ModifyItemPage
             fridgeItem={selectedFridgeItem}
-            onCancel={handleModifyModalClosed}
+            onCancel={() => handleModifyModalClosed()}
             onSave={handleModifyModalClosed}
           />
         </IonModal>

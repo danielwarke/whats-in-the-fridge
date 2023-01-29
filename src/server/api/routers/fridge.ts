@@ -1,16 +1,19 @@
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const fridgeRouter = createTRPCRouter({
-  listItems: publicProcedure.query(({ ctx }) => {
+  listItems: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.fridgeItem.findMany({
+      where: {
+        userId: ctx.session.user.id,
+      },
       orderBy: {
         expirationDate: "asc",
       },
     });
   }),
-  addItem: publicProcedure
+  addItem: protectedProcedure
     .input(
       z.object({
         name: z.string(),
@@ -22,10 +25,11 @@ export const fridgeRouter = createTRPCRouter({
         data: {
           name: input.name,
           expirationDate: input.expirationDate,
+          userId: ctx.session.user.id,
         },
       });
     }),
-  updateItem: publicProcedure
+  updateItem: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -47,6 +51,13 @@ export const fridgeRouter = createTRPCRouter({
         });
       }
 
+      if (foundItem.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to update this item.",
+        });
+      }
+
       return ctx.prisma.fridgeItem.update({
         data: {
           name: input.name,
@@ -57,16 +68,36 @@ export const fridgeRouter = createTRPCRouter({
         },
       });
     }),
-  deleteItem: publicProcedure
+  deleteItem: protectedProcedure
     .input(
       z.object({
-        itemId: z.string(),
+        id: z.string(),
       })
     )
-    .mutation(({ input, ctx }) => {
+    .mutation(async ({ input, ctx }) => {
+      const foundItem = await ctx.prisma.fridgeItem.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+
+      if (!foundItem) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Unable to find fridge item to update.",
+        });
+      }
+
+      if (foundItem.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to update this item.",
+        });
+      }
+
       return ctx.prisma.fridgeItem.delete({
         where: {
-          id: input.itemId,
+          id: input.id,
         },
       });
     }),
