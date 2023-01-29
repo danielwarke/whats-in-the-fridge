@@ -2,31 +2,21 @@ import type { FC } from "react";
 import React, { useCallback, useMemo, useState } from "react";
 import { api } from "../../utils/api";
 import {
-  IonApp,
-  IonButton,
-  IonButtons,
-  IonContent,
   IonFab,
   IonFabButton,
-  IonHeader,
   IonIcon,
   IonItem,
   IonList,
   IonModal,
   IonSearchbar,
   IonText,
-  IonTitle,
-  IonToolbar,
-  setupIonicReact,
   useIonToast,
 } from "@ionic/react";
 import ItemRenderer from "./ItemRenderer";
 import { snowOutline } from "ionicons/icons";
 import ModifyItemPage from "../ModifyItem/ModifyItemPage";
 import type { FridgeItem } from "@prisma/client";
-import { signOut } from "next-auth/react";
-
-setupIonicReact();
+import IonicAppShell from "../IonicAppShell";
 
 const ItemListPage: FC = () => {
   const [presentToast, dismissToast] = useIonToast();
@@ -93,66 +83,56 @@ const ItemListPage: FC = () => {
   }
 
   return (
-    <IonApp>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>{"🍕 What's in the Fridge?"}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={() => void signOut()}>Sign out</IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
-        <IonSearchbar
-          value={search}
-          onIonChange={(e) => setSearch(e.target.value as string)}
-          disabled={fridgeItems.length === 0}
-          placeholder="Search the fridge"
-          showClearButton="focus"
-        />
-        {fridgeItems.length === 0 && (
-          <IonItem lines="none" className="mt-3">
-            <IonText>
-              <h2>Nothing is in the fridge!</h2>
-              <h4>Add some groceries by clicking the blue button below.</h4>
-            </IonText>
-          </IonItem>
+    <IonicAppShell>
+      <IonSearchbar
+        value={search}
+        onIonChange={(e) => setSearch(e.target.value as string)}
+        disabled={fridgeItems.length === 0}
+        placeholder="Search the fridge"
+        showClearButton="focus"
+      />
+      {fridgeItems.length === 0 && (
+        <IonItem lines="none" className="mt-3">
+          <IonText>
+            <h2>Nothing is in the fridge!</h2>
+            <h4>Add some groceries by clicking the blue button below.</h4>
+          </IonText>
+        </IonItem>
+      )}
+      {fridgeItems.length > 0 &&
+        !!search &&
+        filteredFridgeItems.length === 0 && (
+          <IonItem
+            lines="none"
+            className="mt-3"
+          >{`Couldn't find ${search} in the fridge`}</IonItem>
         )}
-        {fridgeItems.length > 0 &&
-          !!search &&
-          filteredFridgeItems.length === 0 && (
-            <IonItem
-              lines="none"
-              className="mt-3"
-            >{`Couldn't find ${search} in the fridge`}</IonItem>
-          )}
-        <IonList>
-          {filteredFridgeItems.map((fridgeItem) => (
-            <ItemRenderer
-              key={fridgeItem.id}
-              fridgeItem={fridgeItem}
-              onClick={() => {
-                setSelectedFridgeItem(fridgeItem);
-                setIsModifyModalOpen(true);
-              }}
-              onDelete={deleteFridgeItem}
-            />
-          ))}
-        </IonList>
-        <IonFab slot="fixed" vertical="bottom" horizontal="end">
-          <IonFabButton onClick={() => setIsModifyModalOpen(true)}>
-            <IonIcon icon={snowOutline} />
-          </IonFabButton>
-        </IonFab>
-        <IonModal isOpen={isModifyModalOpen}>
-          <ModifyItemPage
-            fridgeItem={selectedFridgeItem}
-            onCancel={() => handleModifyModalClosed()}
-            onSave={handleModifyModalClosed}
+      <IonList>
+        {filteredFridgeItems.map((fridgeItem) => (
+          <ItemRenderer
+            key={fridgeItem.id}
+            fridgeItem={fridgeItem}
+            onClick={() => {
+              setSelectedFridgeItem(fridgeItem);
+              setIsModifyModalOpen(true);
+            }}
+            onDelete={deleteFridgeItem}
           />
-        </IonModal>
-      </IonContent>
-    </IonApp>
+        ))}
+      </IonList>
+      <IonFab slot="fixed" vertical="bottom" horizontal="end">
+        <IonFabButton onClick={() => setIsModifyModalOpen(true)}>
+          <IonIcon icon={snowOutline} />
+        </IonFabButton>
+      </IonFab>
+      <IonModal isOpen={isModifyModalOpen}>
+        <ModifyItemPage
+          fridgeItem={selectedFridgeItem}
+          onCancel={() => handleModifyModalClosed()}
+          onSave={handleModifyModalClosed}
+        />
+      </IonModal>
+    </IonicAppShell>
   );
 };
 
