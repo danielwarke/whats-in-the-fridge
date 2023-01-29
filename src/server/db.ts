@@ -1,4 +1,4 @@
-import { FridgeItem, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 import { env } from "../env/server.mjs";
 
