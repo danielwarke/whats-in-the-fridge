@@ -9,6 +9,7 @@ import {
   IonItem,
   IonLabel,
   IonModal,
+  useIonAlert,
 } from "@ionic/react";
 
 const ModifyItemForm: FC<{
@@ -16,12 +17,32 @@ const ModifyItemForm: FC<{
   initialExpirationDate?: string;
   onSave: (itemName: string, expirationDate: string) => void;
 }> = ({ initialName, initialExpirationDate, onSave }) => {
+  const [presentAlert] = useIonAlert();
+
   const [itemName, setItemName] = useState(initialName || "");
   const [expirationDate, setExpirationDate] = useState(
     initialExpirationDate || ""
   );
 
+  function showRequiredError(message: string) {
+    void presentAlert({
+      header: "Error",
+      message,
+      buttons: ["Dismiss"],
+    });
+  }
+
   function saveHandler() {
+    if (!itemName) {
+      showRequiredError("Please enter an item name");
+      return;
+    }
+
+    if (!expirationDate) {
+      showRequiredError("Please enter an expiration date");
+      return;
+    }
+
     onSave(itemName, expirationDate);
   }
 
@@ -40,12 +61,7 @@ const ModifyItemForm: FC<{
           <IonLabel>Expiration Date</IonLabel>
           <IonDatetimeButton datetime="datetime" />
         </IonItem>
-        <IonButton
-          expand="block"
-          className="mt-3 px-3"
-          disabled={!itemName || !expirationDate}
-          onClick={saveHandler}
-        >
+        <IonButton expand="block" className="mt-3 px-3" onClick={saveHandler}>
           Save
         </IonButton>
       </IonContent>
