@@ -6,6 +6,8 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonMenuButton,
+  IonPage,
   IonTitle,
   IonToolbar,
   setupIonicReact,
@@ -13,6 +15,7 @@ import {
 import { signIn, signOut, useSession } from "next-auth/react";
 import ItemListPage from "./ItemList/ItemListPage";
 import WelcomePage from "./WelcomePage";
+import AppMenu from "./AppMenu";
 
 setupIonicReact();
 
@@ -21,21 +24,27 @@ const IonicApp: FC = () => {
 
   return (
     <IonApp>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>{"🍕 What's in the Fridge?"}</IonTitle>
-          <IonButtons slot="end">
-            {sessionData ? (
-              <IonButton onClick={() => void signOut()}>Sign out</IonButton>
-            ) : (
-              <IonButton onClick={() => void signIn()}>Sign in</IonButton>
-            )}
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
-        {sessionData ? <ItemListPage /> : <WelcomePage />}
-      </IonContent>
+      {sessionData && <AppMenu />}
+      <IonPage id="main-content">
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonMenuButton />
+            </IonButtons>
+            <IonTitle>{"🍕 What's in the Fridge?"}</IonTitle>
+            <IonButtons slot="end">
+              {sessionData ? (
+                <IonButton onClick={() => void signOut()}>Sign out</IonButton>
+              ) : (
+                <IonButton onClick={() => void signIn()}>Sign in</IonButton>
+              )}
+            </IonButtons>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {sessionData ? <ItemListPage /> : <WelcomePage />}
+        </IonContent>
+      </IonPage>
     </IonApp>
   );
 };
