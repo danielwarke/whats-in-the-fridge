@@ -1,14 +1,8 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
-import type { FC } from "react";
 
-const ItemList = dynamic(() => import("../components/ItemList/ItemListPage"), {
-  ssr: false,
-});
-
-const Welcome = dynamic(() => import("../components/WelcomePage"), {
+const IonicApp = dynamic(() => import("../components/IonicApp"), {
   ssr: false,
 });
 
@@ -45,15 +39,10 @@ const Home: NextPage = () => {
         <meta name="theme-color" content="#ffffff" />
       </Head>
       <main>
-        <RenderAppContent />
+        <IonicApp />
       </main>
     </>
   );
-};
-
-const RenderAppContent: FC = () => {
-  const { data: sessionData } = useSession();
-  return sessionData ? <ItemList /> : <Welcome />;
 };
 
 export default Home;

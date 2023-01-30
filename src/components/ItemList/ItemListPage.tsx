@@ -16,7 +16,6 @@ import ItemRenderer from "./ItemRenderer";
 import { snowOutline } from "ionicons/icons";
 import ModifyItemPage from "../ModifyItem/ModifyItemPage";
 import type { FridgeItem } from "@prisma/client";
-import IonicAppShell from "../IonicAppShell";
 
 const ItemListPage: FC = () => {
   const [presentToast, dismissToast] = useIonToast();
@@ -83,7 +82,7 @@ const ItemListPage: FC = () => {
   }
 
   return (
-    <IonicAppShell>
+    <>
       <IonSearchbar
         value={search}
         onIonChange={(e) => setSearch(e.target.value as string)}
@@ -132,7 +131,7 @@ const ItemListPage: FC = () => {
           onSave={handleModifyModalClosed}
         />
       </IonModal>
-    </IonicAppShell>
+    </>
   );
 };
 

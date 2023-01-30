@@ -11,10 +11,12 @@ import {
   setupIonicReact,
 } from "@ionic/react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import ItemListPage from "./ItemList/ItemListPage";
+import WelcomePage from "./WelcomePage";
 
 setupIonicReact();
 
-const IonicAppShell: FC<{ children: React.ReactNode }> = ({ children }) => {
+const IonicApp: FC = () => {
   const { data: sessionData } = useSession();
 
   return (
@@ -31,9 +33,11 @@ const IonicAppShell: FC<{ children: React.ReactNode }> = ({ children }) => {
           </IonButtons>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">{children}</IonContent>
+      <IonContent className="ion-padding">
+        {sessionData ? <ItemListPage /> : <WelcomePage />}
+      </IonContent>
     </IonApp>
   );
 };
 
-export default IonicAppShell;
+export default IonicApp;
