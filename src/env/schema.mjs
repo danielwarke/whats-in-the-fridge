@@ -20,7 +20,8 @@ export const serverSchema = z.object({
     process.env.VERCEL ? z.string() : z.string().url(),
   ),
   EMAIL_SERVER: z.string(),
-  EMAIL_FROM: z.string()
+  EMAIL_FROM: z.string(),
+  API_SECRET_KEY: z.string()
 });
 
 /**
@@ -35,6 +36,7 @@ export const serverEnv = {
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   EMAIL_SERVER: process.env.EMAIL_SERVER,
   EMAIL_FROM: process.env.EMAIL_FROM,
+  API_SECRET_KEY: process.env.API_SECRET_KEY
 };
 
 /**
