@@ -12,11 +12,13 @@ import ModifyItemForm from "./ModifyItemForm";
 import type { FC } from "react";
 import React from "react";
 import type { FridgeItem } from "@prisma/client";
+import { capitalizeFirstLetter } from "../../utils/string";
 
 const ModifyItemPage: FC<{
+  container: "fridge" | "pantry";
   fridgeItem?: FridgeItem;
   onClose: () => void;
-}> = ({ fridgeItem, onClose }) => {
+}> = ({ container, fridgeItem, onClose }) => {
   const [presentToast] = useIonToast();
   const util = api.useContext();
 
@@ -38,11 +40,13 @@ const ModifyItemPage: FC<{
         id: fridgeItem.id,
         name: itemName,
         expirationDate: new Date(expirationDate),
+        container: fridgeItem.container as "fridge" | "pantry",
       });
     } else {
       addItemMutation.mutate({
         name: itemName,
         expirationDate: new Date(expirationDate),
+        container,
       });
     }
 
@@ -51,7 +55,7 @@ const ModifyItemPage: FC<{
       void presentToast({
         message: fridgeItem
           ? `Updated ${itemName}`
-          : `Added ${itemName} to the fridge`,
+          : `Added ${itemName} to the ${container}`,
         duration: 2000,
       });
     }, 100);
@@ -65,7 +69,9 @@ const ModifyItemPage: FC<{
             <IonButton onClick={onClose}>Cancel</IonButton>
           </IonButtons>
           <IonTitle>
-            {fridgeItem ? "Update Item" : "Add Item to Fridge"}
+            {fridgeItem
+              ? "Update Item"
+              : `Add Item to ${capitalizeFirstLetter(container)}`}
           </IonTitle>
         </IonToolbar>
       </IonHeader>
