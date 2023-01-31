@@ -2,20 +2,34 @@ import type { FC } from "react";
 import React, { useCallback, useMemo, useState } from "react";
 import { api } from "../../utils/api";
 import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
   IonItem,
   IonList,
+  IonMenuButton,
   IonModal,
+  IonPage,
   IonSearchbar,
   IonText,
+  IonTitle,
+  IonToolbar,
   useIonToast,
 } from "@ionic/react";
 import ItemRenderer from "./ItemRenderer";
 import ModifyItemPage from "../ModifyItem/ModifyItemPage";
 import type { FridgeItem } from "@prisma/client";
+import { emojiMap } from "../../utils/emoji";
+import { capitalizeFirstLetter } from "../../utils/string";
 
-const ItemListPage: FC = () => {
+const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
+  container,
+}) => {
   const [presentToast, dismissToast] = useIonToast();
   const util = api.useContext();
+
+  const { data: emojiData = { emoji: "pizza" } } = api.user.emoji.useQuery();
   const { data: fridgeItems = [] } = api.fridge.listItems.useQuery();
 
   const createFridgeItemMutation = api.fridge.addItem.useMutation({
@@ -53,6 +67,7 @@ const ItemListPage: FC = () => {
     [deleteFridgeItemMutation]
   );
 
+  const emojiSymbol = emojiMap[emojiData.emoji] ?? "🍕";
   const [search, setSearch] = useState("");
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
   const [selectedFridgeItem, setSelectedFridgeItem] = useState<FridgeItem>();
@@ -72,50 +87,67 @@ const ItemListPage: FC = () => {
   }
 
   return (
-    <>
-      <IonSearchbar
-        value={search}
-        onIonChange={(e) => setSearch(e.target.value as string)}
-        disabled={fridgeItems.length === 0}
-        placeholder="Search the fridge"
-        showClearButton="focus"
-      />
-      {fridgeItems.length === 0 && (
-        <IonItem lines="none" className="mt-3">
-          <IonText>
-            <h2>Nothing is in the fridge!</h2>
-            <h4>Add some groceries by clicking the blue button below.</h4>
-          </IonText>
-        </IonItem>
-      )}
-      {fridgeItems.length > 0 &&
-        !!search &&
-        filteredFridgeItems.length === 0 && (
-          <IonItem
-            lines="none"
-            className="mt-3"
-          >{`Couldn't find ${search} in the fridge`}</IonItem>
-        )}
-      <IonList>
-        {filteredFridgeItems.map((fridgeItem) => (
-          <ItemRenderer
-            key={fridgeItem.id}
-            fridgeItem={fridgeItem}
-            onClick={() => {
-              setSelectedFridgeItem(fridgeItem);
-              setIsModifyModalOpen(true);
-            }}
-            onDelete={deleteFridgeItem}
-          />
-        ))}
-      </IonList>
-      <IonModal isOpen={isModifyModalOpen}>
-        <ModifyItemPage
-          fridgeItem={selectedFridgeItem}
-          onClose={handleModifyModalClosed}
+    <IonPage id="main-content">
+      <IonHeader>
+        <IonToolbar>
+          <IonButtons slot="start">
+            <IonMenuButton />
+          </IonButtons>
+          <IonTitle>{`${emojiSymbol} What's in the ${capitalizeFirstLetter(
+            container
+          )}?`}</IonTitle>
+          <IonButtons slot="end">
+            <IonButton onClick={() => setIsModifyModalOpen(true)}>
+              Add item
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent className="ion-padding">
+        <IonSearchbar
+          value={search}
+          onIonChange={(e) => setSearch(e.target.value as string)}
+          disabled={fridgeItems.length === 0}
+          placeholder={`Search the ${container}`}
+          showClearButton="focus"
         />
-      </IonModal>
-    </>
+        {fridgeItems.length === 0 && (
+          <IonItem lines="none" className="mt-3">
+            <IonText>
+              <h2>{`Nothing is in the ${container}!`}</h2>
+              <h4>Add some groceries by clicking the add item button.</h4>
+            </IonText>
+          </IonItem>
+        )}
+        {fridgeItems.length > 0 &&
+          !!search &&
+          filteredFridgeItems.length === 0 && (
+            <IonItem
+              lines="none"
+              className="mt-3"
+            >{`Couldn't find ${search} in the ${container}`}</IonItem>
+          )}
+        <IonList>
+          {filteredFridgeItems.map((fridgeItem) => (
+            <ItemRenderer
+              key={fridgeItem.id}
+              fridgeItem={fridgeItem}
+              onClick={() => {
+                setSelectedFridgeItem(fridgeItem);
+                setIsModifyModalOpen(true);
+              }}
+              onDelete={deleteFridgeItem}
+            />
+          ))}
+        </IonList>
+        <IonModal isOpen={isModifyModalOpen}>
+          <ModifyItemPage
+            fridgeItem={selectedFridgeItem}
+            onClose={handleModifyModalClosed}
+          />
+        </IonModal>
+      </IonContent>
+    </IonPage>
   );
 };
 
