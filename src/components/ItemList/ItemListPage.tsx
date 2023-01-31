@@ -15,6 +15,7 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
+  useIonAlert,
   useIonToast,
 } from "@ionic/react";
 import ItemRenderer from "./ItemRenderer";
@@ -26,6 +27,7 @@ import { capitalizeFirstLetter } from "../../utils/string";
 const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   container,
 }) => {
+  const [presentAlert] = useIonAlert();
   const [presentToast, dismissToast] = useIonToast();
   const util = api.useContext();
 
@@ -40,6 +42,38 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
     },
   });
 
+  const udpateFridgeItemMutation = api.fridge.updateItem.useMutation({
+    onSuccess: async () => {
+      await util.fridge.listItems.invalidate();
+    },
+  });
+
+  function confirmMoveFridgeItem(
+    fridgeItem: FridgeItem,
+    destination: "fridge" | "pantry"
+  ) {
+    void presentAlert({
+      header: "Please Confirm",
+      message: `Are you sure you would like to move ${fridgeItem.name} to the ${destination}?`,
+      buttons: [
+        "Cancel",
+        {
+          text: "Confirm",
+          handler: () => {
+            udpateFridgeItemMutation.mutate({
+              ...fridgeItem,
+              container: destination,
+            });
+            void presentToast(
+              `Moved ${fridgeItem.name} to the ${destination}`,
+              2000
+            );
+          },
+        },
+      ],
+    });
+  }
+
   const deleteFridgeItemMutation = api.fridge.deleteItem.useMutation({
     onSuccess: async (deletedItem) => {
       await util.fridge.listItems.invalidate();
@@ -53,6 +87,7 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
               createFridgeItemMutation.mutate({
                 name: deletedItem.name,
                 expirationDate: deletedItem.expirationDate,
+                container: deletedItem.container as "fridge" | "pantry",
               });
             },
           },
@@ -138,6 +173,9 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
                 setSelectedFridgeItem(fridgeItem);
                 setIsModifyModalOpen(true);
               }}
+              onMove={(destination) =>
+                confirmMoveFridgeItem(fridgeItem, destination)
+              }
               onDelete={deleteFridgeItem}
             />
           ))}
