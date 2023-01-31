@@ -10,6 +10,7 @@ import {
   IonSelectOption,
   IonText,
   IonTitle,
+  IonToggle,
   IonToolbar,
 } from "@ionic/react";
 import { emojiMap } from "../utils/emoji";
@@ -20,35 +21,36 @@ import { signOut, useSession } from "next-auth/react";
 const AppMenu: FC = () => {
   const { data: sessionData } = useSession();
   const util = api.useContext();
-  const { data: emojiData = { emoji: "pizza" } } = api.user.emoji.useQuery();
+  const {
+    data: preferences = { emoji: "pizza", notificationsEnabled: false },
+    isLoading: preferencesLoading,
+  } = api.user.preferences.useQuery();
 
-  const updateEmojiMutation = api.user.setEmoji.useMutation({
+  const setPreferencesMutation = api.user.setPreferences.useMutation({
     onSuccess: async () => {
-      await util.user.emoji.invalidate();
+      await util.user.preferences.invalidate();
     },
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    context: {
-      skipBatch: true,
-    } as never,
   });
 
-  const [selectedEmoji, setSelectedEmoji] = useState("");
+  const [emoji, setEmoji] = useState("");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
-    if (emojiData) {
-      setSelectedEmoji(emojiData.emoji);
+    if (!preferencesLoading) {
+      setEmoji(preferences.emoji);
+      setNotificationsEnabled(preferences.notificationsEnabled);
     }
-  }, [emojiData]);
+  }, [preferences, preferencesLoading]);
 
-  function handleEmojiChange(emojiValue?: string) {
-    if (emojiValue) {
-      setSelectedEmoji(emojiValue);
-      updateEmojiMutation.mutate({ emoji: emojiValue });
-    }
+  function savePreferences() {
+    setPreferencesMutation.mutate({
+      emoji,
+      notificationsEnabled,
+    });
   }
 
   return (
-    <IonMenu contentId="main-content">
+    <IonMenu contentId="main-content" onIonWillClose={savePreferences}>
       <IonHeader>
         <IonToolbar>
           <IonTitle>Main Menu</IonTitle>
@@ -63,8 +65,8 @@ const AppMenu: FC = () => {
         <IonItem>
           <IonLabel>Emoji</IonLabel>
           <IonSelect
-            value={selectedEmoji}
-            onIonChange={(e) => handleEmojiChange(e.target.value as string)}
+            value={emoji}
+            onIonChange={(e) => setEmoji(e.target.value as string)}
           >
             {Object.entries(emojiMap).map(([key, emoji]) => (
               <IonSelectOption key={key} value={key}>
@@ -72,6 +74,14 @@ const AppMenu: FC = () => {
               </IonSelectOption>
             ))}
           </IonSelect>
+        </IonItem>
+        <IonItem>
+          <IonLabel>Enable notifications</IonLabel>
+          <IonToggle
+            checked={notificationsEnabled}
+            onIonChange={(e) => setNotificationsEnabled(e.target.checked)}
+            slot="end"
+          />
         </IonItem>
         <IonItem button onClick={() => void signOut()}>
           Sign out

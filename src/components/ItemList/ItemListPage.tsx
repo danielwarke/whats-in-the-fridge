@@ -31,7 +31,9 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   const [presentToast, dismissToast] = useIonToast();
   const util = api.useContext();
 
-  const { data: emojiData = { emoji: "pizza" } } = api.user.emoji.useQuery();
+  const { data: preferences = { emoji: "pizza" } } =
+    api.user.preferences.useQuery();
+
   const { data: fridgeItems = [] } = api.fridge.listItems.useQuery({
     container,
   });
@@ -104,7 +106,7 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
     [deleteFridgeItemMutation]
   );
 
-  const emojiSymbol = emojiMap[emojiData.emoji] ?? "🍕";
+  const emojiSymbol = emojiMap[preferences.emoji] ?? "🍕";
   const [search, setSearch] = useState("");
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
   const [selectedFridgeItem, setSelectedFridgeItem] = useState<FridgeItem>();
