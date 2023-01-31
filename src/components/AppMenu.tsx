@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useEffect, useState } from "react";
 import {
   IonContent,
   IonHeader,
@@ -7,15 +8,17 @@ import {
   IonMenu,
   IonSelect,
   IonSelectOption,
+  IonText,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
 import { emojiMap } from "../utils/emoji";
 import { api } from "../utils/api";
-import { useEffect, useState } from "react";
 import { capitalizeFirstLetter } from "../utils/string";
+import { signOut, useSession } from "next-auth/react";
 
 const AppMenu: FC = () => {
+  const { data: sessionData } = useSession();
   const util = api.useContext();
   const { data: emojiData = { emoji: "pizza" } } = api.user.emoji.useQuery();
 
@@ -48,10 +51,15 @@ const AppMenu: FC = () => {
     <IonMenu contentId="main-content">
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Mein Menu</IonTitle>
+          <IonTitle>Main Menu</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
+        {!!sessionData?.user?.email && (
+          <IonItem>
+            <IonText className="py-2">{`Logged in as: ${sessionData?.user?.email}`}</IonText>
+          </IonItem>
+        )}
         <IonItem>
           <IonLabel>Emoji</IonLabel>
           <IonSelect
@@ -64,6 +72,9 @@ const AppMenu: FC = () => {
               </IonSelectOption>
             ))}
           </IonSelect>
+        </IonItem>
+        <IonItem button onClick={() => void signOut()}>
+          Sign out
         </IonItem>
       </IonContent>
     </IonMenu>

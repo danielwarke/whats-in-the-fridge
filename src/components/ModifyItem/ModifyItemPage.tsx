@@ -5,6 +5,7 @@ import {
   IonLoading,
   IonTitle,
   IonToolbar,
+  useIonToast,
 } from "@ionic/react";
 import { api } from "../../utils/api";
 import ModifyItemForm from "./ModifyItemForm";
@@ -14,9 +15,9 @@ import type { FridgeItem } from "@prisma/client";
 
 const ModifyItemPage: FC<{
   fridgeItem?: FridgeItem;
-  onCancel: () => void;
-  onSave: (successMessage: string) => void;
-}> = ({ fridgeItem, onCancel, onSave }) => {
+  onClose: () => void;
+}> = ({ fridgeItem, onClose }) => {
+  const [presentToast] = useIonToast();
   const util = api.useContext();
 
   const addItemMutation = api.fridge.addItem.useMutation({
@@ -45,9 +46,15 @@ const ModifyItemPage: FC<{
       });
     }
 
-    onSave(
-      fridgeItem ? `Updated ${itemName}` : `Added ${itemName} to the fridge`
-    );
+    onClose();
+    setTimeout(() => {
+      void presentToast({
+        message: fridgeItem
+          ? `Updated ${itemName}`
+          : `Added ${itemName} to the fridge`,
+        duration: 2000,
+      });
+    }, 100);
   }
 
   return (
@@ -55,7 +62,7 @@ const ModifyItemPage: FC<{
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonButton onClick={onCancel}>Cancel</IonButton>
+            <IonButton onClick={onClose}>Cancel</IonButton>
           </IonButtons>
           <IonTitle>
             {fridgeItem ? "Update Item" : "Add Item to Fridge"}
