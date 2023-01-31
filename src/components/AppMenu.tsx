@@ -18,10 +18,15 @@ import { capitalizeFirstLetter } from "../utils/string";
 const AppMenu: FC = () => {
   const util = api.useContext();
   const { data: emojiData = { emoji: "pizza" } } = api.user.emoji.useQuery();
+
   const updateEmojiMutation = api.user.setEmoji.useMutation({
     onSuccess: async () => {
       await util.user.emoji.invalidate();
     },
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    context: {
+      skipBatch: true,
+    } as never,
   });
 
   const [selectedEmoji, setSelectedEmoji] = useState("");
