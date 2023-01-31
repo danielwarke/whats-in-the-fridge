@@ -2,9 +2,6 @@ import type { FC } from "react";
 import React, { useCallback, useMemo, useState } from "react";
 import { api } from "../../utils/api";
 import {
-  IonFab,
-  IonFabButton,
-  IonIcon,
   IonItem,
   IonList,
   IonModal,
@@ -13,7 +10,6 @@ import {
   useIonToast,
 } from "@ionic/react";
 import ItemRenderer from "./ItemRenderer";
-import { snowOutline } from "ionicons/icons";
 import ModifyItemPage from "../ModifyItem/ModifyItemPage";
 import type { FridgeItem } from "@prisma/client";
 
@@ -68,16 +64,10 @@ const ItemListPage: FC = () => {
     );
   }, [fridgeItems, search]);
 
-  function handleModifyModalClosed(successMessage?: string) {
+  function handleModifyModalClosed() {
     setIsModifyModalOpen(false);
     setTimeout(() => {
       setSelectedFridgeItem(undefined);
-      if (successMessage) {
-        void presentToast({
-          message: successMessage,
-          duration: 2000,
-        });
-      }
     }, 100);
   }
 
@@ -119,16 +109,10 @@ const ItemListPage: FC = () => {
           />
         ))}
       </IonList>
-      <IonFab slot="fixed" vertical="bottom" horizontal="end">
-        <IonFabButton onClick={() => setIsModifyModalOpen(true)}>
-          <IonIcon icon={snowOutline} />
-        </IonFabButton>
-      </IonFab>
       <IonModal isOpen={isModifyModalOpen}>
         <ModifyItemPage
           fridgeItem={selectedFridgeItem}
-          onCancel={() => handleModifyModalClosed()}
-          onSave={handleModifyModalClosed}
+          onClose={handleModifyModalClosed}
         />
       </IonModal>
     </>
