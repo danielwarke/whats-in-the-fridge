@@ -38,18 +38,11 @@ export const fridgeRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const foundItem = await ctx.prisma.fridgeItem.findUnique({
+      const foundItem = await ctx.prisma.fridgeItem.findUniqueOrThrow({
         where: {
           id: input.id,
         },
       });
-
-      if (!foundItem) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Unable to find fridge item to update.",
-        });
-      }
 
       if (foundItem.userId !== ctx.session.user.id) {
         throw new TRPCError({
@@ -75,18 +68,11 @@ export const fridgeRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const foundItem = await ctx.prisma.fridgeItem.findUnique({
+      const foundItem = await ctx.prisma.fridgeItem.findUniqueOrThrow({
         where: {
           id: input.id,
         },
       });
-
-      if (!foundItem) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Unable to find fridge item to update.",
-        });
-      }
 
       if (foundItem.userId !== ctx.session.user.id) {
         throw new TRPCError({

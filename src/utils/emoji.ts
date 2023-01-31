@@ -1,4 +1,4 @@
-export const emojiMap = {
+export const emojiMap: Record<string, string> = {
   apple: "🍎",
   pear: "🍐",
   orange: "🍊",
@@ -22,7 +22,7 @@ export const emojiMap = {
   lettuce: "🥬",
   cucumber: "🥒",
   chipotle: "🌶",
-  bellPepper: "🫑",
+  pepper: "🫑",
   corn: "🌽",
   carrot: "🥕",
   olive: "🫒",

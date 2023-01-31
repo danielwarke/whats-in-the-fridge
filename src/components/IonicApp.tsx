@@ -16,11 +16,21 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import ItemListPage from "./ItemList/ItemListPage";
 import WelcomePage from "./WelcomePage";
 import AppMenu from "./AppMenu";
+import { api } from "../utils/api";
+import { emojiMap } from "../utils/emoji";
 
 setupIonicReact();
 
 const IonicApp: FC = () => {
   const { data: sessionData } = useSession();
+  const { data: emojiData = { emoji: "pizza" } } = api.user.emoji.useQuery(
+    undefined,
+    {
+      enabled: !!sessionData,
+    }
+  );
+
+  const emojiSymbol = emojiMap[emojiData.emoji as string] ?? "🍕";
 
   return (
     <IonApp>
@@ -31,7 +41,7 @@ const IonicApp: FC = () => {
             <IonButtons slot="start">
               <IonMenuButton />
             </IonButtons>
-            <IonTitle>{"🍕 What's in the Fridge?"}</IonTitle>
+            <IonTitle>{`${emojiSymbol} What's in the Fridge?`}</IonTitle>
             <IonButtons slot="end">
               {sessionData ? (
                 <IonButton onClick={() => void signOut()}>Sign out</IonButton>

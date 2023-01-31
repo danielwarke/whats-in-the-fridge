@@ -58,6 +58,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   fridgeItems   FridgeItem[]
+  emoji         String       @default("pizza")
 }
 
 model VerificationToken {
