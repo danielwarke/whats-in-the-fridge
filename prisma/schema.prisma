@@ -46,6 +46,7 @@ model FridgeItem {
   name           String
   userId         String
   expirationDate DateTime
+  container      String   @default("fridge")
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

@@ -30,7 +30,9 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   const util = api.useContext();
 
   const { data: emojiData = { emoji: "pizza" } } = api.user.emoji.useQuery();
-  const { data: fridgeItems = [] } = api.fridge.listItems.useQuery();
+  const { data: fridgeItems = [] } = api.fridge.listItems.useQuery({
+    container,
+  });
 
   const createFridgeItemMutation = api.fridge.addItem.useMutation({
     onSuccess: async () => {
@@ -89,7 +91,7 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   return (
     <IonPage id="main-content">
       <IonHeader>
-        <IonToolbar>
+        <IonToolbar color={container === "fridge" ? "secondary" : "warning"}>
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
@@ -142,6 +144,7 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
         </IonList>
         <IonModal isOpen={isModifyModalOpen}>
           <ModifyItemPage
+            container={container}
             fridgeItem={selectedFridgeItem}
             onClose={handleModifyModalClosed}
           />
