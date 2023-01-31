@@ -30,7 +30,7 @@ const IonicApp: FC = () => {
     }
   );
 
-  const emojiSymbol = emojiMap[emojiData.emoji as string] ?? "🍕";
+  const emojiSymbol = emojiMap[emojiData.emoji] ?? "🍕";
 
   return (
     <IonApp>

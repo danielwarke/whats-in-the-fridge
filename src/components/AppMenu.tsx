@@ -28,7 +28,7 @@ const AppMenu: FC = () => {
 
   useEffect(() => {
     if (emojiData) {
-      setSelectedEmoji(emojiData.emoji as string);
+      setSelectedEmoji(emojiData.emoji);
     }
   }, [emojiData]);
 
