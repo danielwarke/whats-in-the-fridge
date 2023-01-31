@@ -1,0 +1,13 @@
+name: daily-cron
+on:
+  schedule:
+    - cron: '0 14 * * *'
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email reports by calling out API endpoint
+        run: |
+          curl --request POST \
+          --url 'https://whats-in-the-fridge-rouge.vercel.app/api/email-users' \
+          --header 'Authorization: Bearer ${{ secrets.API_SECRET_KEY }}'
