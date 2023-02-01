@@ -23,14 +23,19 @@ export function getExpirationStatusColor(expirationDate: Date) {
 export function getExpirationText(expirationDate: Date) {
   const currentDate = new Date();
   const dayDiff = getDayDiff(currentDate, expirationDate);
-  if (dayDiff === 0) {
-    return "expires today";
-  }
-
-  const expiration = dayjs(expirationDate);
-  if (currentDate > expirationDate) {
-    return `expired ${expiration.fromNow()}`;
-  } else {
-    return `expires ${expiration.fromNow()}`;
+  switch (dayDiff) {
+    case 0:
+      return "expires today";
+    case 1:
+      return "expired yesterday";
+    case -1:
+      return "expires tomorrow";
+    default:
+      const expiration = dayjs(expirationDate);
+      if (currentDate > expirationDate) {
+        return `expired ${expiration.fromNow()}`;
+      } else {
+        return `expires ${expiration.fromNow()}`;
+      }
   }
 }
