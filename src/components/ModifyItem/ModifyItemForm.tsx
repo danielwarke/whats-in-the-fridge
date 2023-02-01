@@ -12,6 +12,10 @@ import {
   useIonAlert,
 } from "@ionic/react";
 
+// max date is 4 years from now
+const maxDate = new Date();
+maxDate.setFullYear(maxDate.getFullYear() + 4);
+
 const ModifyItemForm: FC<{
   initialName?: string;
   initialExpirationDate?: string;
@@ -69,9 +73,11 @@ const ModifyItemForm: FC<{
         <IonDatetime
           id="datetime"
           presentation="date"
+          className="dark:text-white"
           value={expirationDate}
           onIonChange={(e) => setExpirationDate(e.target.value as string)}
           showDefaultButtons
+          max={maxDate.toISOString()}
         />
       </IonModal>
     </>
