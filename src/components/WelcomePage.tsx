@@ -32,7 +32,7 @@ const WelcomePage: FC = () => {
           <IonText>
             <h1>
               {
-                "Keep track of what's in the fridge and get warned before food expires so you can throw away less food."
+                "Keep track of what's in your fridge and pantry. Get warned before food expires so you can throw away less food."
               }
             </h1>
             <h3>Use the sign in button to get started.</h3>

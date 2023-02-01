@@ -13,7 +13,7 @@ const Home: NextPage = () => {
         <title>Whats in the Fridge?</title>
         <meta
           name="description"
-          content="Never forget expired food in the fridge again"
+          content="Never forget expired food in the fridge or pantry again"
         />
         <link rel="icon" href="/favicon.ico" />
         <link
