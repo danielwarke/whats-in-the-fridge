@@ -17,7 +17,7 @@ import {
 import { emojiMap } from "../utils/emoji";
 import { api } from "../utils/api";
 import { capitalizeFirstLetter } from "../utils/string";
-import { signOut, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { logoGithub } from "ionicons/icons";
 
 const AppMenu: FC = () => {
@@ -91,6 +91,9 @@ const AppMenu: FC = () => {
         >
           View source code
           <IonIcon icon={logoGithub} slot="end" />
+        </IonItem>
+        <IonItem button onClick={() => void signIn()}>
+          Link accounts
         </IonItem>
         <IonItem button onClick={() => void signOut()}>
           Sign out
