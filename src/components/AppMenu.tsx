@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   IonContent,
   IonHeader,
+  IonIcon,
   IonItem,
   IonLabel,
   IonMenu,
@@ -17,6 +18,7 @@ import { emojiMap } from "../utils/emoji";
 import { api } from "../utils/api";
 import { capitalizeFirstLetter } from "../utils/string";
 import { signOut, useSession } from "next-auth/react";
+import { logoGithub } from "ionicons/icons";
 
 const AppMenu: FC = () => {
   const { data: sessionData } = useSession();
@@ -82,6 +84,13 @@ const AppMenu: FC = () => {
             onIonChange={(e) => setNotificationsEnabled(e.target.checked)}
             slot="end"
           />
+        </IonItem>
+        <IonItem
+          href="https://github.com/danielwarke/whats-in-the-fridge"
+          target="_blank"
+        >
+          View source code
+          <IonIcon icon={logoGithub} slot="end" />
         </IonItem>
         <IonItem button onClick={() => void signOut()}>
           Sign out
