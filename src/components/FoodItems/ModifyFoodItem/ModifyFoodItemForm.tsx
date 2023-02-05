@@ -16,7 +16,7 @@ import {
 const maxDate = new Date();
 maxDate.setFullYear(maxDate.getFullYear() + 4);
 
-const ModifyItemForm: FC<{
+const ModifyFoodItemForm: FC<{
   initialName?: string;
   initialExpirationDate?: string;
   onSave: (itemName: string, expirationDate: string) => void;
@@ -84,4 +84,4 @@ const ModifyItemForm: FC<{
   );
 };
 
-export default ModifyItemForm;
+export default ModifyFoodItemForm;

@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import React, { useCallback, useMemo, useState } from "react";
-import { api } from "../../utils/api";
+import { api } from "../../../utils/api";
 import {
   IonButton,
   IonButtons,
@@ -18,13 +18,13 @@ import {
   useIonAlert,
   useIonToast,
 } from "@ionic/react";
-import ItemRenderer from "./ItemRenderer";
-import ModifyItemPage from "../ModifyItem/ModifyItemPage";
+import FoodItemRenderer from "./FoodItemRenderer";
+import ModifyFoodItemPage from "../ModifyFoodItem/ModifyFoodItemPage";
 import type { FoodItem } from "@prisma/client";
-import { emojiMap } from "../../utils/emoji";
-import { capitalizeFirstLetter } from "../../utils/string";
+import { emojiMap } from "../../../utils/emoji";
+import { capitalizeFirstLetter } from "../../../utils/string";
 
-const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
+const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   container,
 }) => {
   const [presentAlert] = useIonAlert();
@@ -166,7 +166,7 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
         )}
         <IonList>
           {filteredFoodItems.map((foodItem) => (
-            <ItemRenderer
+            <FoodItemRenderer
               key={foodItem.id}
               foodItem={foodItem}
               onClick={() => {
@@ -181,7 +181,7 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
           ))}
         </IonList>
         <IonModal isOpen={isModifyModalOpen}>
-          <ModifyItemPage
+          <ModifyFoodItemPage
             container={container}
             foodItem={selectedFoodItem}
             onClose={handleModifyModalClosed}
@@ -192,4 +192,4 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   );
 };
 
-export default ItemListPage;
+export default FoodItemListPage;

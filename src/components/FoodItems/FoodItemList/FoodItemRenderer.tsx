@@ -11,9 +11,9 @@ import {
   IonText,
 } from "@ionic/react";
 import { snowOutline, sparklesOutline, trashOutline } from "ionicons/icons";
-import { getExpirationStatusColor, getExpirationText } from "../../utils/date";
+import { getExpirationStatusColor, getExpirationText } from "../../../utils/date";
 
-const ItemRenderer: FC<{
+const FoodItemRenderer: FC<{
   foodItem: FoodItem;
   onClick: MouseEventHandler;
   onMove: (destination: "fridge" | "pantry") => void;
@@ -50,4 +50,4 @@ const ItemRenderer: FC<{
   );
 };
 
-export default ItemRenderer;
+export default FoodItemRenderer;

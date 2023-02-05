@@ -9,7 +9,7 @@ import {
   IonTabs,
 } from "@ionic/react";
 import { Redirect, Route } from "react-router-dom";
-import ItemListPage from "./ItemList/ItemListPage";
+import FoodItemListPage from "./FoodItems/FoodItemList/FoodItemListPage";
 import { snowOutline, sparklesOutline } from "ionicons/icons";
 
 const AppTabs: FC = () => {
@@ -17,10 +17,10 @@ const AppTabs: FC = () => {
     <IonTabs>
       <IonRouterOutlet>
         <Route path="/fridge">
-          <ItemListPage container="fridge" />
+          <FoodItemListPage container="fridge" />
         </Route>
         <Route path="/pantry">
-          <ItemListPage container="pantry" />
+          <FoodItemListPage container="pantry" />
         </Route>
         <Route exact path="/">
           <Redirect to="/fridge" />
