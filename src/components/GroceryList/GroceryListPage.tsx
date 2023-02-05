@@ -5,7 +5,10 @@ import {
   IonButton,
   IonButtons,
   IonContent,
+  IonFab,
+  IonFabButton,
   IonHeader,
+  IonIcon,
   IonItem,
   IonMenuButton,
   IonPage,
@@ -14,10 +17,15 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
+  useIonAlert,
+  useIonToast,
 } from "@ionic/react";
 import GroceryListItemRenderer from "./GroceryListItemRenderer";
+import { trashOutline } from "ionicons/icons";
 
 const GroceryListPage: FC = () => {
+  const [presentAlert] = useIonAlert();
+  const [presentToast] = useIonToast();
   const util = api.useContext();
 
   const { data: groceryListItems = [] } = api.groceryList.list.useQuery();
@@ -45,6 +53,13 @@ const GroceryListPage: FC = () => {
     },
   });
 
+  const deleteCompletedMutation = api.groceryList.deleteCompleted.useMutation({
+    onSuccess: async (deletedItems) => {
+      await util.groceryList.list.invalidate();
+      void presentToast(`Deleted ${deletedItems.count} items`, 2000);
+    },
+  });
+
   const [search, setSearch] = useState("");
 
   const filteredGroceryList = useMemo(() => {
@@ -53,6 +68,22 @@ const GroceryListPage: FC = () => {
       listItem.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [groceryListItems, search]);
+
+  function confirmDeleteCompletedItems() {
+    void presentAlert({
+      header: "Please Confirm",
+      message: "Would you like to delete all completed grocery list items?",
+      buttons: [
+        "Cancel",
+        {
+          text: "Confirm",
+          handler: () => {
+            deleteCompletedMutation.mutate();
+          },
+        },
+      ],
+    });
+  }
 
   return (
     <IonPage id="main-content">
@@ -121,6 +152,15 @@ const GroceryListPage: FC = () => {
             />
           ))}
         </IonReorderGroup>
+        <IonFab slot="fixed" vertical="bottom" horizontal="end">
+          <IonFabButton
+            color="danger"
+            disabled={!groceryListItems.some((listItem) => listItem.completed)}
+            onClick={confirmDeleteCompletedItems}
+          >
+            <IonIcon icon={trashOutline} />
+          </IonFabButton>
+        </IonFab>
       </IonContent>
     </IonPage>
   );

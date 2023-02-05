@@ -67,31 +67,12 @@ export const groceryListRouter = createTRPCRouter({
         },
       });
     }),
-  delete: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
-      const foundGroceryListItem =
-        await ctx.prisma.groceryListItem.findUniqueOrThrow({
-          where: {
-            id: input.id,
-          },
-        });
-
-      if (foundGroceryListItem.userId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not authorized to delete this grocery list item.",
-        });
-      }
-
-      return ctx.prisma.groceryListItem.delete({
-        where: {
-          id: input.id,
-        },
-      });
-    }),
+  deleteCompleted: protectedProcedure.mutation(async ({ ctx }) => {
+    return ctx.prisma.groceryListItem.deleteMany({
+      where: {
+        userId: ctx.session.user.id,
+        completed: true,
+      },
+    });
+  }),
 });

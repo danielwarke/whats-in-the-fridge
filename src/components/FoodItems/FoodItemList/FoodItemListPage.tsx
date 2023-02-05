@@ -44,7 +44,7 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
     },
   });
 
-  const udpateFoodItemMutation = api.food.updateItem.useMutation({
+  const updateFoodItemMutation = api.food.updateItem.useMutation({
     onSuccess: async () => {
       await util.food.listItems.invalidate();
     },
@@ -56,13 +56,13 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   ) {
     void presentAlert({
       header: "Please Confirm",
-      message: `Are you sure you would like to move ${foodItem.name} to the ${destination}?`,
+      message: `Would like to move ${foodItem.name} to the ${destination}?`,
       buttons: [
         "Cancel",
         {
           text: "Confirm",
           handler: () => {
-            udpateFoodItemMutation.mutate({
+            updateFoodItemMutation.mutate({
               ...foodItem,
               container: destination,
             });
