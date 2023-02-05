@@ -143,8 +143,10 @@ const GroceryListPage: FC = () => {
         {groceryListItems.length === 0 && (
           <IonItem lines="none" className="mt-3">
             <IonText>
-              <h2>Nothing is in the grocery list!</h2>
-              <h4>Add some items by clicking the add item button.</h4>
+              <h2>Nothing is on the grocery list!</h2>
+              <h4>
+                Add some items to the list by clicking the add item button.
+              </h4>
             </IonText>
           </IonItem>
         )}
