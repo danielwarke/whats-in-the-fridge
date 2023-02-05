@@ -20,7 +20,7 @@ import {
 } from "@ionic/react";
 import ItemRenderer from "./ItemRenderer";
 import ModifyItemPage from "../ModifyItem/ModifyItemPage";
-import type { FridgeItem } from "@prisma/client";
+import type { FoodItem } from "@prisma/client";
 import { emojiMap } from "../../utils/emoji";
 import { capitalizeFirstLetter } from "../../utils/string";
 
@@ -34,40 +34,40 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   const { data: preferences = { emoji: "pizza" } } =
     api.user.preferences.useQuery();
 
-  const { data: fridgeItems = [] } = api.fridge.listItems.useQuery({
+  const { data: foodItems = [] } = api.food.listItems.useQuery({
     container,
   });
 
-  const createFridgeItemMutation = api.fridge.addItem.useMutation({
+  const createFoodItemMutation = api.food.addItem.useMutation({
     onSuccess: async () => {
-      await util.fridge.listItems.invalidate();
+      await util.food.listItems.invalidate();
     },
   });
 
-  const udpateFridgeItemMutation = api.fridge.updateItem.useMutation({
+  const udpateFoodItemMutation = api.food.updateItem.useMutation({
     onSuccess: async () => {
-      await util.fridge.listItems.invalidate();
+      await util.food.listItems.invalidate();
     },
   });
 
-  function confirmMoveFridgeItem(
-    fridgeItem: FridgeItem,
+  function confirmMoveFoodItem(
+    foodItem: FoodItem,
     destination: "fridge" | "pantry"
   ) {
     void presentAlert({
       header: "Please Confirm",
-      message: `Are you sure you would like to move ${fridgeItem.name} to the ${destination}?`,
+      message: `Are you sure you would like to move ${foodItem.name} to the ${destination}?`,
       buttons: [
         "Cancel",
         {
           text: "Confirm",
           handler: () => {
-            udpateFridgeItemMutation.mutate({
-              ...fridgeItem,
+            udpateFoodItemMutation.mutate({
+              ...foodItem,
               container: destination,
             });
             void presentToast(
-              `Moved ${fridgeItem.name} to the ${destination}`,
+              `Moved ${foodItem.name} to the ${destination}`,
               2000
             );
           },
@@ -76,9 +76,9 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
     });
   }
 
-  const deleteFridgeItemMutation = api.fridge.deleteItem.useMutation({
+  const deleteFoodItemMutation = api.food.deleteItem.useMutation({
     onSuccess: async (deletedItem) => {
-      await util.fridge.listItems.invalidate();
+      await util.food.listItems.invalidate();
       await dismissToast();
       void presentToast({
         message: `Removed ${deletedItem.name}`,
@@ -86,7 +86,7 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
           {
             text: "Undo",
             handler: () => {
-              createFridgeItemMutation.mutate({
+              createFoodItemMutation.mutate({
                 name: deletedItem.name,
                 expirationDate: deletedItem.expirationDate,
                 container: deletedItem.container as "fridge" | "pantry",
@@ -99,29 +99,29 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
     },
   });
 
-  const deleteFridgeItem = useCallback(
+  const deleteFoodItem = useCallback(
     (itemId: string) => {
-      deleteFridgeItemMutation.mutate({ id: itemId });
+      deleteFoodItemMutation.mutate({ id: itemId });
     },
-    [deleteFridgeItemMutation]
+    [deleteFoodItemMutation]
   );
 
   const emojiSymbol = emojiMap[preferences.emoji] ?? "🍕";
   const [search, setSearch] = useState("");
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
-  const [selectedFridgeItem, setSelectedFridgeItem] = useState<FridgeItem>();
+  const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem>();
 
-  const filteredFridgeItems = useMemo(() => {
-    if (!search) return fridgeItems;
-    return fridgeItems.filter((fridgeItem) =>
-      fridgeItem.name.toLowerCase().includes(search.toLowerCase())
+  const filteredFoodItems = useMemo(() => {
+    if (!search) return foodItems;
+    return foodItems.filter((foodItem) =>
+      foodItem.name.toLowerCase().includes(search.toLowerCase())
     );
-  }, [fridgeItems, search]);
+  }, [foodItems, search]);
 
   function handleModifyModalClosed() {
     setIsModifyModalOpen(false);
     setTimeout(() => {
-      setSelectedFridgeItem(undefined);
+      setSelectedFoodItem(undefined);
     }, 100);
   }
 
@@ -146,11 +146,11 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
         <IonSearchbar
           value={search}
           onIonChange={(e) => setSearch(e.target.value as string)}
-          disabled={fridgeItems.length === 0}
+          disabled={foodItems.length === 0}
           placeholder={`Search the ${container}`}
           showClearButton="focus"
         />
-        {fridgeItems.length === 0 && (
+        {foodItems.length === 0 && (
           <IonItem lines="none" className="mt-3">
             <IonText>
               <h2>{`Nothing is in the ${container}!`}</h2>
@@ -158,34 +158,32 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
             </IonText>
           </IonItem>
         )}
-        {fridgeItems.length > 0 &&
-          !!search &&
-          filteredFridgeItems.length === 0 && (
-            <IonItem
-              lines="none"
-              className="mt-3"
-            >{`Couldn't find ${search} in the ${container}`}</IonItem>
-          )}
+        {foodItems.length > 0 && !!search && filteredFoodItems.length === 0 && (
+          <IonItem
+            lines="none"
+            className="mt-3"
+          >{`Couldn't find ${search} in the ${container}`}</IonItem>
+        )}
         <IonList>
-          {filteredFridgeItems.map((fridgeItem) => (
+          {filteredFoodItems.map((foodItem) => (
             <ItemRenderer
-              key={fridgeItem.id}
-              fridgeItem={fridgeItem}
+              key={foodItem.id}
+              foodItem={foodItem}
               onClick={() => {
-                setSelectedFridgeItem(fridgeItem);
+                setSelectedFoodItem(foodItem);
                 setIsModifyModalOpen(true);
               }}
               onMove={(destination) =>
-                confirmMoveFridgeItem(fridgeItem, destination)
+                confirmMoveFoodItem(foodItem, destination)
               }
-              onDelete={deleteFridgeItem}
+              onDelete={deleteFoodItem}
             />
           ))}
         </IonList>
         <IonModal isOpen={isModifyModalOpen}>
           <ModifyItemPage
             container={container}
-            fridgeItem={selectedFridgeItem}
+            foodItem={selectedFoodItem}
             onClose={handleModifyModalClosed}
           />
         </IonModal>
