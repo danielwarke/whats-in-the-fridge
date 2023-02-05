@@ -42,16 +42,26 @@ model FoodItem {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model GroceryListItem {
+  id        String  @id @default(cuid())
+  name      String
+  completed Boolean @default(false)
+  sortOrder Int
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model User {
-  id                   String     @id @default(cuid())
+  id                   String            @id @default(cuid())
   name                 String?
-  email                String?    @unique
+  email                String?           @unique
   emailVerified        DateTime?
   image                String?
-  emoji                String     @default("pizza")
-  notificationsEnabled Boolean    @default(false)
+  emoji                String            @default("pizza")
+  notificationsEnabled Boolean           @default(false)
   accounts             Account[]
   foodItems            FoodItem[]
+  groceryList          GroceryListItem[]
   sessions             Session[]
 }
 
