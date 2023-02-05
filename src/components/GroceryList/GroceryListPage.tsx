@@ -1,4 +1,4 @@
-import type { FC} from "react";
+import type { FC } from "react";
 import React, { useMemo, useState } from "react";
 import { api } from "../../utils/api";
 import {
@@ -23,14 +23,25 @@ const GroceryListPage: FC = () => {
   const { data: groceryListItems = [] } = api.groceryList.list.useQuery();
 
   const addGroceryListItemMutation = api.groceryList.add.useMutation({
-    onSuccess: async () => {
-      await util.groceryList.list.invalidate();
+    onSuccess: (addedItem) => {
+      util.groceryList.list.setData(undefined, (list) =>
+        list ? [addedItem, ...list] : [addedItem]
+      );
     },
   });
 
   const updateGroceryListItemMutation = api.groceryList.update.useMutation({
-    onSuccess: async () => {
-      await util.groceryList.list.invalidate();
+    onSuccess: (updatedItem) => {
+      util.groceryList.list.setData(undefined, (list) => {
+        if (!list) return [updatedItem];
+        return list.map((listItem) => {
+          if (listItem.id === updatedItem.id) {
+            return updatedItem;
+          }
+
+          return listItem;
+        });
+      });
     },
   });
 
@@ -67,7 +78,7 @@ const GroceryListPage: FC = () => {
       <IonContent className="ion-padding">
         <IonSearchbar
           value={search}
-          onIonChange={(e) => setSearch(e.target.value as string)}
+          onIonInput={(e) => setSearch(e.target.value as string)}
           disabled={groceryListItems.length === 0}
           placeholder={"Search the grocery list"}
           showClearButton="focus"

@@ -78,7 +78,11 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
 
   const deleteFoodItemMutation = api.food.deleteItem.useMutation({
     onSuccess: async (deletedItem) => {
-      await util.food.listItems.invalidate();
+      util.food.listItems.setData({ container }, (list) => {
+        if (!list) return [];
+        return list.filter((listItem) => listItem.id !== deletedItem.id);
+      });
+
       await dismissToast();
       void presentToast({
         message: `Removed ${deletedItem.name}`,
@@ -145,7 +149,7 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
       <IonContent className="ion-padding">
         <IonSearchbar
           value={search}
-          onIonChange={(e) => setSearch(e.target.value as string)}
+          onIonInput={(e) => setSearch(e.target.value as string)}
           disabled={foodItems.length === 0}
           placeholder={`Search the ${container}`}
           showClearButton="focus"

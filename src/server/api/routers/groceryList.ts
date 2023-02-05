@@ -23,7 +23,6 @@ export const groceryListRouter = createTRPCRouter({
       const groceryListCount = await ctx.prisma.groceryListItem.count({
         where: {
           userId: ctx.session.user.id,
-          completed: false,
         },
       });
 

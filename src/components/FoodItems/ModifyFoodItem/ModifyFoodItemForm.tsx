@@ -9,7 +9,7 @@ import {
   IonItem,
   IonLabel,
   IonModal,
-  useIonAlert,
+  useIonAlert
 } from "@ionic/react";
 
 // max date is 4 years from now
@@ -25,7 +25,7 @@ const ModifyFoodItemForm: FC<{
 
   const [itemName, setItemName] = useState(initialName || "");
   const [expirationDate, setExpirationDate] = useState(
-    initialExpirationDate || ""
+    initialExpirationDate || new Date().toISOString()
   );
 
   function showRequiredError(message: string) {
@@ -42,11 +42,6 @@ const ModifyFoodItemForm: FC<{
       return;
     }
 
-    if (!expirationDate) {
-      showRequiredError("Please enter an expiration date");
-      return;
-    }
-
     onSave(itemName, expirationDate);
   }
 
@@ -54,11 +49,12 @@ const ModifyFoodItemForm: FC<{
     <>
       <IonContent className="ion-padding">
         <IonItem>
-          <IonLabel position="floating">Item name</IonLabel>
           <IonInput
+            label="Item name"
+            labelPlacement="floating"
             placeholder="Enter item name"
             value={itemName}
-            onIonChange={(e) => setItemName(e.target.value as string)}
+            onIonInput={(e) => setItemName(e.target.value as string)}
             autoCorrect="on"
             autofocus
           />

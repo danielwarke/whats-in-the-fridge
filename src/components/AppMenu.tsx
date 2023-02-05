@@ -65,8 +65,8 @@ const AppMenu: FC = () => {
           </IonItem>
         )}
         <IonItem>
-          <IonLabel>Emoji</IonLabel>
           <IonSelect
+            label="Emoji"
             value={emoji}
             onIonChange={(e) => setEmoji(e.target.value as string)}
           >
