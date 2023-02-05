@@ -64,7 +64,12 @@ const GroceryListPage: FC = () => {
   const deleteCompletedMutation = api.groceryList.deleteCompleted.useMutation({
     onSuccess: async (deletedItems) => {
       await util.groceryList.list.invalidate();
-      void presentToast(`Deleted ${deletedItems.count} items`, 2000);
+      void presentToast(
+        `Deleted ${deletedItems.count} item${
+          deletedItems.count > 1 ? "s" : ""
+        }`,
+        1500
+      );
     },
   });
 

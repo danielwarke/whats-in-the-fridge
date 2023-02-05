@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { api } from "../../../utils/api";
 import {
   IonActionSheet,
@@ -49,6 +49,15 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
     },
   });
 
+  const addItemToGroceryListMutation = api.groceryList.add.useMutation({
+    onSuccess: (addedItem) => {
+      util.groceryList.list.setData(undefined, (list) =>
+        list ? [addedItem, ...list] : [addedItem]
+      );
+      void presentToast(`Added ${addedItem.name} to the grocery list`, 1500);
+    },
+  });
+
   function moveFoodItem(foodItem: FoodItem, destination: "fridge" | "pantry") {
     updateFoodItemMutation.mutate({
       ...foodItem,
@@ -83,13 +92,6 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
       });
     },
   });
-
-  const deleteFoodItem = useCallback(
-    (itemId: string) => {
-      deleteFoodItemMutation.mutate({ id: itemId });
-    },
-    [deleteFoodItemMutation]
-  );
 
   const emojiSymbol = emojiMap[preferences.emoji] ?? "🍕";
   const actionSheetDismissed = useRef(false);
@@ -175,7 +177,7 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
           header="Actions"
           buttons={[
             {
-              text: "Modify",
+              text: "Update details",
               data: {
                 action: "modify",
               },
@@ -189,7 +191,13 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
               },
             },
             {
-              text: "Delete",
+              text: "Add to grocery list",
+              data: {
+                action: "grocery",
+              },
+            },
+            {
+              text: "Remove",
               role: "destructive",
               data: {
                 action: "delete",
@@ -211,7 +219,7 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             switch (detail.data?.action) {
               case "delete":
-                deleteFoodItem(selectedFoodItem.id);
+                deleteFoodItemMutation.mutate({ id: selectedFoodItem.id });
                 break;
               case "modify":
                 setIsModifyModalOpen(true);
@@ -222,6 +230,11 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
                   selectedFoodItem,
                   selectedFoodItem.container === "fridge" ? "pantry" : "fridge"
                 );
+                break;
+              case "grocery":
+                addItemToGroceryListMutation.mutate({
+                  name: selectedFoodItem.name,
+                });
                 break;
             }
 
