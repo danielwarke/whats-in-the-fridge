@@ -1,7 +1,8 @@
 import type { FC } from "react";
-import React, { useCallback, useMemo, useState } from "react";
-import { api } from "../../utils/api";
+import React, { useMemo, useRef, useState } from "react";
+import { api } from "../../../utils/api";
 import {
+  IonActionSheet,
   IonButton,
   IonButtons,
   IonContent,
@@ -15,19 +16,17 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
-  useIonAlert,
   useIonToast,
 } from "@ionic/react";
-import ItemRenderer from "./ItemRenderer";
-import ModifyItemPage from "../ModifyItem/ModifyItemPage";
+import FoodItemRenderer from "./FoodItemRenderer";
+import ModifyFoodItemPage from "../ModifyFoodItem/ModifyFoodItemPage";
 import type { FoodItem } from "@prisma/client";
-import { emojiMap } from "../../utils/emoji";
-import { capitalizeFirstLetter } from "../../utils/string";
+import { emojiMap } from "../../../utils/emoji";
+import { capitalizeFirstLetter } from "../../../utils/string";
 
-const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
+const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   container,
 }) => {
-  const [presentAlert] = useIonAlert();
   const [presentToast, dismissToast] = useIonToast();
   const util = api.useContext();
 
@@ -44,41 +43,36 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
     },
   });
 
-  const udpateFoodItemMutation = api.food.updateItem.useMutation({
+  const updateFoodItemMutation = api.food.updateItem.useMutation({
     onSuccess: async () => {
       await util.food.listItems.invalidate();
     },
   });
 
-  function confirmMoveFoodItem(
-    foodItem: FoodItem,
-    destination: "fridge" | "pantry"
-  ) {
-    void presentAlert({
-      header: "Please Confirm",
-      message: `Are you sure you would like to move ${foodItem.name} to the ${destination}?`,
-      buttons: [
-        "Cancel",
-        {
-          text: "Confirm",
-          handler: () => {
-            udpateFoodItemMutation.mutate({
-              ...foodItem,
-              container: destination,
-            });
-            void presentToast(
-              `Moved ${foodItem.name} to the ${destination}`,
-              2000
-            );
-          },
-        },
-      ],
+  const addItemToGroceryListMutation = api.groceryList.add.useMutation({
+    onSuccess: (addedItem) => {
+      util.groceryList.list.setData(undefined, (list) =>
+        list ? [addedItem, ...list] : [addedItem]
+      );
+      void presentToast(`Added ${addedItem.name} to the grocery list`, 1500);
+    },
+  });
+
+  function moveFoodItem(foodItem: FoodItem, destination: "fridge" | "pantry") {
+    updateFoodItemMutation.mutate({
+      ...foodItem,
+      container: destination,
     });
+    void presentToast(`Moved ${foodItem.name} to the ${destination}`, 1500);
   }
 
   const deleteFoodItemMutation = api.food.deleteItem.useMutation({
     onSuccess: async (deletedItem) => {
-      await util.food.listItems.invalidate();
+      util.food.listItems.setData({ container }, (list) => {
+        if (!list) return [];
+        return list.filter((listItem) => listItem.id !== deletedItem.id);
+      });
+
       await dismissToast();
       void presentToast({
         message: `Removed ${deletedItem.name}`,
@@ -94,21 +88,16 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
             },
           },
         ],
-        duration: 5000,
+        duration: 1500,
       });
     },
   });
 
-  const deleteFoodItem = useCallback(
-    (itemId: string) => {
-      deleteFoodItemMutation.mutate({ id: itemId });
-    },
-    [deleteFoodItemMutation]
-  );
-
   const emojiSymbol = emojiMap[preferences.emoji] ?? "🍕";
+  const actionSheetDismissed = useRef(false);
   const [search, setSearch] = useState("");
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+  const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem>();
 
   const filteredFoodItems = useMemo(() => {
@@ -145,7 +134,7 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
       <IonContent className="ion-padding">
         <IonSearchbar
           value={search}
-          onIonChange={(e) => setSearch(e.target.value as string)}
+          onIonInput={(e) => setSearch(e.target.value as string)}
           disabled={foodItems.length === 0}
           placeholder={`Search the ${container}`}
           showClearButton="focus"
@@ -166,30 +155,98 @@ const ItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
         )}
         <IonList>
           {filteredFoodItems.map((foodItem) => (
-            <ItemRenderer
+            <FoodItemRenderer
               key={foodItem.id}
               foodItem={foodItem}
               onClick={() => {
                 setSelectedFoodItem(foodItem);
-                setIsModifyModalOpen(true);
+                setIsActionSheetOpen(true);
               }}
-              onMove={(destination) =>
-                confirmMoveFoodItem(foodItem, destination)
-              }
-              onDelete={deleteFoodItem}
             />
           ))}
         </IonList>
         <IonModal isOpen={isModifyModalOpen}>
-          <ModifyItemPage
+          <ModifyFoodItemPage
             container={container}
             foodItem={selectedFoodItem}
             onClose={handleModifyModalClosed}
           />
         </IonModal>
+        <IonActionSheet
+          isOpen={!!selectedFoodItem && isActionSheetOpen}
+          header="Actions"
+          buttons={[
+            {
+              text: "Update details",
+              data: {
+                action: "modify",
+              },
+            },
+            {
+              text: `Move to ${
+                selectedFoodItem?.container === "fridge" ? "pantry" : "fridge"
+              }`,
+              data: {
+                action: "move",
+              },
+            },
+            {
+              text: "Add to grocery list",
+              data: {
+                action: "grocery",
+              },
+            },
+            {
+              text: "Remove",
+              role: "destructive",
+              data: {
+                action: "delete",
+              },
+            },
+            {
+              text: "Cancel",
+              role: "cancel",
+              data: {
+                action: "cancel",
+              },
+            },
+          ]}
+          onDidPresent={() => (actionSheetDismissed.current = false)}
+          onDidDismiss={({ detail }) => {
+            setIsActionSheetOpen(false);
+            if (!selectedFoodItem || actionSheetDismissed.current) return;
+            let resetSelection = true;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            switch (detail.data?.action) {
+              case "delete":
+                deleteFoodItemMutation.mutate({ id: selectedFoodItem.id });
+                break;
+              case "modify":
+                setIsModifyModalOpen(true);
+                resetSelection = false;
+                break;
+              case "move":
+                moveFoodItem(
+                  selectedFoodItem,
+                  selectedFoodItem.container === "fridge" ? "pantry" : "fridge"
+                );
+                break;
+              case "grocery":
+                addItemToGroceryListMutation.mutate({
+                  name: selectedFoodItem.name,
+                });
+                break;
+            }
+
+            actionSheetDismissed.current = true;
+            if (resetSelection) {
+              setSelectedFoodItem(undefined);
+            }
+          }}
+        />
       </IonContent>
     </IonPage>
   );
 };
 
-export default ItemListPage;
+export default FoodItemListPage;

@@ -7,14 +7,14 @@ import {
   IonToolbar,
   useIonToast,
 } from "@ionic/react";
-import { api } from "../../utils/api";
-import ModifyItemForm from "./ModifyItemForm";
+import { api } from "../../../utils/api";
+import ModifyFoodItemForm from "./ModifyFoodItemForm";
 import type { FC } from "react";
 import React from "react";
 import type { FoodItem } from "@prisma/client";
-import { capitalizeFirstLetter } from "../../utils/string";
+import { capitalizeFirstLetter } from "../../../utils/string";
 
-const ModifyItemPage: FC<{
+const ModifyFoodItemPage: FC<{
   container: "fridge" | "pantry";
   foodItem?: FoodItem;
   onClose: () => void;
@@ -75,14 +75,14 @@ const ModifyItemPage: FC<{
           </IonTitle>
         </IonToolbar>
       </IonHeader>
-      <ModifyItemForm
+      <ModifyFoodItemForm
         initialName={foodItem?.name}
         initialExpirationDate={foodItem?.expirationDate.toISOString()}
         onSave={saveHandler}
       />
-      <IonLoading isOpen={addItemMutation.isLoading} />
+      <IonLoading isOpen={addItemMutation.isLoading} duration={1000} />
     </>
   );
 };
 
-export default ModifyItemPage;
+export default ModifyFoodItemPage;

@@ -9,18 +9,22 @@ import {
   IonTabs,
 } from "@ionic/react";
 import { Redirect, Route } from "react-router-dom";
-import ItemListPage from "./ItemList/ItemListPage";
-import { snowOutline, sparklesOutline } from "ionicons/icons";
+import FoodItemListPage from "./FoodItems/FoodItemList/FoodItemListPage";
+import { listOutline, snowOutline, sparklesOutline } from "ionicons/icons";
+import GroceryListPage from "./GroceryList/GroceryListPage";
 
 const AppTabs: FC = () => {
   return (
     <IonTabs>
       <IonRouterOutlet>
         <Route path="/fridge">
-          <ItemListPage container="fridge" />
+          <FoodItemListPage container="fridge" />
         </Route>
         <Route path="/pantry">
-          <ItemListPage container="pantry" />
+          <FoodItemListPage container="pantry" />
+        </Route>
+        <Route path="/grocery-list">
+          <GroceryListPage />
         </Route>
         <Route exact path="/">
           <Redirect to="/fridge" />
@@ -34,6 +38,10 @@ const AppTabs: FC = () => {
         <IonTabButton tab="pantry" href="/pantry">
           <IonIcon icon={sparklesOutline} />
           <IonLabel>Pantry</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="groceryList" href="/grocery-list">
+          <IonIcon icon={listOutline} />
+          <IonLabel>Grocery List</IonLabel>
         </IonTabButton>
       </IonTabBar>
     </IonTabs>
