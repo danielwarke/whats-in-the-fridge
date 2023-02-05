@@ -80,7 +80,7 @@ const ModifyFoodItemPage: FC<{
         initialExpirationDate={foodItem?.expirationDate.toISOString()}
         onSave={saveHandler}
       />
-      <IonLoading isOpen={addItemMutation.isLoading} />
+      <IonLoading isOpen={addItemMutation.isLoading} duration={1000} />
     </>
   );
 };

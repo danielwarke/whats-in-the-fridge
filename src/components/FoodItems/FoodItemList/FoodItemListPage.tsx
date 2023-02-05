@@ -1,7 +1,8 @@
 import type { FC } from "react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { api } from "../../../utils/api";
 import {
+  IonActionSheet,
   IonButton,
   IonButtons,
   IonContent,
@@ -111,8 +112,10 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   );
 
   const emojiSymbol = emojiMap[preferences.emoji] ?? "🍕";
+  const actionSheetDismissed = useRef(false);
   const [search, setSearch] = useState("");
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+  const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem>();
 
   const filteredFoodItems = useMemo(() => {
@@ -175,12 +178,8 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
               foodItem={foodItem}
               onClick={() => {
                 setSelectedFoodItem(foodItem);
-                setIsModifyModalOpen(true);
+                setIsActionSheetOpen(true);
               }}
-              onMove={(destination) =>
-                confirmMoveFoodItem(foodItem, destination)
-              }
-              onDelete={() => deleteFoodItem(foodItem.id)}
             />
           ))}
         </IonList>
@@ -191,6 +190,64 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
             onClose={handleModifyModalClosed}
           />
         </IonModal>
+        <IonActionSheet
+          isOpen={!!selectedFoodItem && isActionSheetOpen}
+          header="Actions"
+          buttons={[
+            {
+              text: "Modify",
+              data: {
+                action: "modify",
+              },
+            },
+            {
+              text: `Move to ${
+                selectedFoodItem?.container === "fridge" ? "pantry" : "fridge"
+              }`,
+              data: {
+                action: "move",
+              },
+            },
+            {
+              text: "Delete",
+              role: "destructive",
+              data: {
+                action: "delete",
+              },
+            },
+            {
+              text: "Cancel",
+              role: "cancel",
+              data: {
+                action: "cancel",
+              },
+            },
+          ]}
+          onDidPresent={() => (actionSheetDismissed.current = false)}
+          onDidDismiss={({ detail }) => {
+            setIsActionSheetOpen(false);
+            if (!selectedFoodItem || actionSheetDismissed.current) return;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            switch (detail.data?.action) {
+              case "delete":
+                deleteFoodItem(selectedFoodItem.id);
+                break;
+              case "modify":
+                setIsModifyModalOpen(true);
+                break;
+              case "move":
+                confirmMoveFoodItem(
+                  selectedFoodItem,
+                  selectedFoodItem.container === "fridge" ? "pantry" : "fridge"
+                );
+                break;
+              default:
+                setSelectedFoodItem(undefined);
+            }
+
+            actionSheetDismissed.current = true;
+          }}
+        />
       </IonContent>
     </IonPage>
   );
