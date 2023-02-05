@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 
 const containerEnum = z.enum(["fridge", "pantry"]);
 
-export const fridgeRouter = createTRPCRouter({
+export const foodRouter = createTRPCRouter({
   listItems: protectedProcedure
     .input(
       z.object({
@@ -12,7 +12,7 @@ export const fridgeRouter = createTRPCRouter({
       })
     )
     .query(({ input, ctx }) => {
-      return ctx.prisma.fridgeItem.findMany({
+      return ctx.prisma.foodItem.findMany({
         where: {
           userId: ctx.session.user.id,
           container: input.container,
@@ -31,7 +31,7 @@ export const fridgeRouter = createTRPCRouter({
       })
     )
     .mutation(({ input, ctx }) => {
-      return ctx.prisma.fridgeItem.create({
+      return ctx.prisma.foodItem.create({
         data: {
           name: input.name,
           expirationDate: input.expirationDate,
@@ -50,7 +50,7 @@ export const fridgeRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const foundItem = await ctx.prisma.fridgeItem.findUniqueOrThrow({
+      const foundItem = await ctx.prisma.foodItem.findUniqueOrThrow({
         where: {
           id: input.id,
         },
@@ -63,7 +63,7 @@ export const fridgeRouter = createTRPCRouter({
         });
       }
 
-      return ctx.prisma.fridgeItem.update({
+      return ctx.prisma.foodItem.update({
         data: {
           name: input.name,
           expirationDate: input.expirationDate,
@@ -81,7 +81,7 @@ export const fridgeRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const foundItem = await ctx.prisma.fridgeItem.findUniqueOrThrow({
+      const foundItem = await ctx.prisma.foodItem.findUniqueOrThrow({
         where: {
           id: input.id,
         },
@@ -94,7 +94,7 @@ export const fridgeRouter = createTRPCRouter({
         });
       }
 
-      return ctx.prisma.fridgeItem.delete({
+      return ctx.prisma.foodItem.delete({
         where: {
           id: input.id,
         },

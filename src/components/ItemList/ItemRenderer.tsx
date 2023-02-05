@@ -1,6 +1,6 @@
 import type { FC, MouseEventHandler } from "react";
 import React from "react";
-import type { FridgeItem } from "@prisma/client";
+import type { FoodItem } from "@prisma/client";
 import {
   IonIcon,
   IonItem,
@@ -14,18 +14,18 @@ import { snowOutline, sparklesOutline, trashOutline } from "ionicons/icons";
 import { getExpirationStatusColor, getExpirationText } from "../../utils/date";
 
 const ItemRenderer: FC<{
-  fridgeItem: FridgeItem;
+  foodItem: FoodItem;
   onClick: MouseEventHandler;
   onMove: (destination: "fridge" | "pantry") => void;
   onDelete: (itemId: string) => void;
-}> = ({ fridgeItem, onClick, onMove, onDelete }) => {
+}> = ({ foodItem, onClick, onMove, onDelete }) => {
   const moveItemConfig =
-    fridgeItem.container === "fridge"
+    foodItem.container === "fridge"
       ? { color: "warning", icon: sparklesOutline, destination: "pantry" }
       : { color: "secondary", icon: snowOutline, destination: "fridge" };
 
   return (
-    <IonItemSliding key={fridgeItem.id}>
+    <IonItemSliding key={foodItem.id}>
       <IonItemOptions side="end">
         <IonItemOption color={moveItemConfig.color}>
           <IonIcon
@@ -36,14 +36,14 @@ const ItemRenderer: FC<{
             }
           />
         </IonItemOption>
-        <IonItemOption color="danger" onClick={() => onDelete(fridgeItem.id)}>
+        <IonItemOption color="danger" onClick={() => onDelete(foodItem.id)}>
           <IonIcon slot="icon-only" icon={trashOutline} />
         </IonItemOption>
       </IonItemOptions>
       <IonItem button onClick={onClick}>
-        <IonLabel>{fridgeItem.name}</IonLabel>
-        <IonText color={getExpirationStatusColor(fridgeItem.expirationDate)}>
-          {getExpirationText(fridgeItem.expirationDate)}
+        <IonLabel>{foodItem.name}</IonLabel>
+        <IonText color={getExpirationStatusColor(foodItem.expirationDate)}>
+          {getExpirationText(foodItem.expirationDate)}
         </IonText>
       </IonItem>
     </IonItemSliding>

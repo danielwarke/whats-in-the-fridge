@@ -11,36 +11,36 @@ import { api } from "../../utils/api";
 import ModifyItemForm from "./ModifyItemForm";
 import type { FC } from "react";
 import React from "react";
-import type { FridgeItem } from "@prisma/client";
+import type { FoodItem } from "@prisma/client";
 import { capitalizeFirstLetter } from "../../utils/string";
 
 const ModifyItemPage: FC<{
   container: "fridge" | "pantry";
-  fridgeItem?: FridgeItem;
+  foodItem?: FoodItem;
   onClose: () => void;
-}> = ({ container, fridgeItem, onClose }) => {
+}> = ({ container, foodItem, onClose }) => {
   const [presentToast] = useIonToast();
   const util = api.useContext();
 
-  const addItemMutation = api.fridge.addItem.useMutation({
+  const addItemMutation = api.food.addItem.useMutation({
     onSuccess: async () => {
-      await util.fridge.listItems.invalidate();
+      await util.food.listItems.invalidate();
     },
   });
 
-  const updateItemMutation = api.fridge.updateItem.useMutation({
+  const updateItemMutation = api.food.updateItem.useMutation({
     onSuccess: async () => {
-      await util.fridge.listItems.invalidate();
+      await util.food.listItems.invalidate();
     },
   });
 
   function saveHandler(itemName: string, expirationDate: string) {
-    if (fridgeItem) {
+    if (foodItem) {
       updateItemMutation.mutate({
-        id: fridgeItem.id,
+        id: foodItem.id,
         name: itemName,
         expirationDate: new Date(expirationDate),
-        container: fridgeItem.container as "fridge" | "pantry",
+        container: foodItem.container as "fridge" | "pantry",
       });
     } else {
       addItemMutation.mutate({
@@ -53,7 +53,7 @@ const ModifyItemPage: FC<{
     onClose();
     setTimeout(() => {
       void presentToast({
-        message: fridgeItem
+        message: foodItem
           ? `Updated ${itemName}`
           : `Added ${itemName} to the ${container}`,
         duration: 2000,
@@ -69,15 +69,15 @@ const ModifyItemPage: FC<{
             <IonButton onClick={onClose}>Cancel</IonButton>
           </IonButtons>
           <IonTitle>
-            {fridgeItem
+            {foodItem
               ? "Update Item"
               : `Add Item to ${capitalizeFirstLetter(container)}`}
           </IonTitle>
         </IonToolbar>
       </IonHeader>
       <ModifyItemForm
-        initialName={fridgeItem?.name}
-        initialExpirationDate={fridgeItem?.expirationDate.toISOString()}
+        initialName={foodItem?.name}
+        initialExpirationDate={foodItem?.expirationDate.toISOString()}
         onSave={saveHandler}
       />
       <IonLoading isOpen={addItemMutation.isLoading} />

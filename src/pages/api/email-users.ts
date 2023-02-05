@@ -1,15 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { env } from "../../env/server.mjs";
 import * as nodemailer from "nodemailer";
-import type { FridgeItem } from "@prisma/client";
+import type { FoodItem } from "@prisma/client";
 import { prisma } from "../../server/db";
 
-function getFridgeItemsHtmlTable(fridgeItems: FridgeItem[]) {
-  if (fridgeItems.length === 0) {
+function getFoodItemsHtmlTable(foodItems: FoodItem[]) {
+  1;
+  if (foodItems.length === 0) {
     return "<p>No items expiring soon</p>";
   }
 
-  const tableRows = fridgeItems.map((item) => {
+  const tableRows = foodItems.map((item) => {
     return `<tr><td>${
       item.name
     }</td><td>${item.expirationDate.toLocaleDateString()}</td></tr>`;
@@ -41,7 +42,7 @@ export default async function handler(
         let emailsSent = 0;
         for (const user of usersToNotify) {
           if (!user.email) continue;
-          const foodItemsExpiringSoon = await prisma.fridgeItem.findMany({
+          const foodItemsExpiringSoon = await prisma.foodItem.findMany({
             where: {
               user: {
                 id: user.id,
@@ -64,9 +65,9 @@ export default async function handler(
               from: env.EMAIL_FROM,
               to: user.email,
               subject: "What's in the Fridge - Daily Report",
-              html: `<p>The following items may no longer be good to eat:</p><h3>Fridge</h3>${getFridgeItemsHtmlTable(
+              html: `<p>The following items may no longer be good to eat:</p><h3>Fridge</h3>${getFoodItemsHtmlTable(
                 fridgeItems
-              )}<h3>Pantry</h3>${getFridgeItemsHtmlTable(pantryItems)}`,
+              )}<h3>Pantry</h3>${getFoodItemsHtmlTable(pantryItems)}`,
             });
 
             emailsSent++;
