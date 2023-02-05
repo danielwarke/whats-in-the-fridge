@@ -25,7 +25,7 @@ const GroceryListItemRenderer: FC<{
       <IonInput
         className={completed ? "line-through" : ""}
         disabled={completed || undefined}
-        placeholder="Enter name"
+        placeholder="Enter item name"
         value={name}
         onIonInput={(e) => {
           const newValue = e.target.value as string;

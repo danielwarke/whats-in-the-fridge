@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import React, { useMemo, useState } from "react";
 import { api } from "../../utils/api";
+import type { ItemReorderEventDetail } from "@ionic/react";
 import {
   IonButton,
   IonButtons,
@@ -22,6 +23,7 @@ import {
 } from "@ionic/react";
 import GroceryListItemRenderer from "./GroceryListItemRenderer";
 import { trashOutline } from "ionicons/icons";
+import type { GroceryListItem } from "@prisma/client";
 
 const GroceryListPage: FC = () => {
   const [presentAlert] = useIonAlert();
@@ -30,7 +32,7 @@ const GroceryListPage: FC = () => {
 
   const { data: groceryListItems = [] } = api.groceryList.list.useQuery();
 
-  const addGroceryListItemMutation = api.groceryList.add.useMutation({
+  const addItemMutation = api.groceryList.add.useMutation({
     onSuccess: (addedItem) => {
       util.groceryList.list.setData(undefined, (list) =>
         list ? [addedItem, ...list] : [addedItem]
@@ -38,7 +40,7 @@ const GroceryListPage: FC = () => {
     },
   });
 
-  const updateGroceryListItemMutation = api.groceryList.update.useMutation({
+  const updateItemMutation = api.groceryList.update.useMutation({
     onSuccess: (updatedItem) => {
       util.groceryList.list.setData(undefined, (list) => {
         if (!list) return [updatedItem];
@@ -50,6 +52,12 @@ const GroceryListPage: FC = () => {
           return listItem;
         });
       });
+    },
+  });
+
+  const reorderItemsMutation = api.groceryList.updateSortOrder.useMutation({
+    onSuccess: (updatedItems) => {
+      util.groceryList.list.setData(undefined, updatedItems);
     },
   });
 
@@ -85,6 +93,19 @@ const GroceryListPage: FC = () => {
     });
   }
 
+  function handleReorder(event: CustomEvent<ItemReorderEventDetail>) {
+    const updatedItems = event.detail.complete(
+      groceryListItems
+    ) as GroceryListItem[];
+
+    reorderItemsMutation.mutate({
+      items: updatedItems.map((item, index) => ({
+        id: item.id,
+        sortOrder: updatedItems.length - index,
+      })),
+    });
+  }
+
   return (
     <IonPage id="main-content">
       <IonHeader>
@@ -96,7 +117,7 @@ const GroceryListPage: FC = () => {
           <IonButtons slot="end">
             <IonButton
               onClick={() =>
-                addGroceryListItemMutation.mutate({
+                addItemMutation.mutate({
                   name: "",
                 })
               }
@@ -117,8 +138,8 @@ const GroceryListPage: FC = () => {
         {groceryListItems.length === 0 && (
           <IonItem lines="none" className="mt-3">
             <IonText>
-              <h2>{`Nothing is in the grocery list!`}</h2>
-              <h4>Add some groceries by clicking the add item button.</h4>
+              <h2>Nothing is in the grocery list!</h2>
+              <h4>Add some items by clicking the add item button.</h4>
             </IonText>
           </IonItem>
         )}
@@ -130,20 +151,20 @@ const GroceryListPage: FC = () => {
               className="mt-3"
             >{`Couldn't find ${search} in the grocery list`}</IonItem>
           )}
-        <IonReorderGroup>
+        <IonReorderGroup disabled={!!search} onIonItemReorder={handleReorder}>
           {filteredGroceryList.map((listItem) => (
             <GroceryListItemRenderer
               key={listItem.id}
               groceryListItem={listItem}
               onRenamed={(newName) =>
-                updateGroceryListItemMutation.mutate({
+                updateItemMutation.mutate({
                   id: listItem.id,
                   name: newName,
                   completed: listItem.completed,
                 })
               }
               onCompleteToggled={(completed) =>
-                updateGroceryListItemMutation.mutate({
+                updateItemMutation.mutate({
                   id: listItem.id,
                   name: listItem.name,
                   completed,

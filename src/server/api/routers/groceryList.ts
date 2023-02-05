@@ -75,4 +75,29 @@ export const groceryListRouter = createTRPCRouter({
       },
     });
   }),
+  updateSortOrder: protectedProcedure
+    .input(
+      z.object({
+        items: z.array(
+          z.object({
+            id: z.string(),
+            sortOrder: z.number().min(0),
+          })
+        ),
+      })
+    )
+    .mutation(({ input, ctx }) => {
+      const transactions = input.items.map((item) =>
+        ctx.prisma.groceryListItem.update({
+          data: {
+            sortOrder: item.sortOrder,
+          },
+          where: {
+            id: item.id,
+          },
+        })
+      );
+
+      return ctx.prisma.$transaction(transactions);
+    }),
 });
