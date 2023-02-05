@@ -16,7 +16,6 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
-  useIonAlert,
   useIonToast,
 } from "@ionic/react";
 import FoodItemRenderer from "./FoodItemRenderer";
@@ -28,7 +27,6 @@ import { capitalizeFirstLetter } from "../../../utils/string";
 const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   container,
 }) => {
-  const [presentAlert] = useIonAlert();
   const [presentToast, dismissToast] = useIonToast();
   const util = api.useContext();
 
@@ -51,30 +49,12 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
     },
   });
 
-  function confirmMoveFoodItem(
-    foodItem: FoodItem,
-    destination: "fridge" | "pantry"
-  ) {
-    void presentAlert({
-      header: "Please Confirm",
-      message: `Would like to move ${foodItem.name} to the ${destination}?`,
-      buttons: [
-        "Cancel",
-        {
-          text: "Confirm",
-          handler: () => {
-            updateFoodItemMutation.mutate({
-              ...foodItem,
-              container: destination,
-            });
-            void presentToast(
-              `Moved ${foodItem.name} to the ${destination}`,
-              2000
-            );
-          },
-        },
-      ],
+  function moveFoodItem(foodItem: FoodItem, destination: "fridge" | "pantry") {
+    updateFoodItemMutation.mutate({
+      ...foodItem,
+      container: destination,
     });
+    void presentToast(`Moved ${foodItem.name} to the ${destination}`, 1500);
   }
 
   const deleteFoodItemMutation = api.food.deleteItem.useMutation({
@@ -99,7 +79,7 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
             },
           },
         ],
-        duration: 5000,
+        duration: 1500,
       });
     },
   });
@@ -227,6 +207,7 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
           onDidDismiss={({ detail }) => {
             setIsActionSheetOpen(false);
             if (!selectedFoodItem || actionSheetDismissed.current) return;
+            let resetSelection = true;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             switch (detail.data?.action) {
               case "delete":
@@ -234,18 +215,20 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
                 break;
               case "modify":
                 setIsModifyModalOpen(true);
+                resetSelection = false;
                 break;
               case "move":
-                confirmMoveFoodItem(
+                moveFoodItem(
                   selectedFoodItem,
                   selectedFoodItem.container === "fridge" ? "pantry" : "fridge"
                 );
                 break;
-              default:
-                setSelectedFoodItem(undefined);
             }
 
             actionSheetDismissed.current = true;
+            if (resetSelection) {
+              setSelectedFoodItem(undefined);
+            }
           }}
         />
       </IonContent>
