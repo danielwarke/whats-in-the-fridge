@@ -11,13 +11,16 @@ import {
   IonText,
 } from "@ionic/react";
 import { snowOutline, sparklesOutline, trashOutline } from "ionicons/icons";
-import { getExpirationStatusColor, getExpirationText } from "../../../utils/date";
+import {
+  getExpirationStatusColor,
+  getExpirationText,
+} from "../../../utils/date";
 
 const FoodItemRenderer: FC<{
   foodItem: FoodItem;
   onClick: MouseEventHandler;
   onMove: (destination: "fridge" | "pantry") => void;
-  onDelete: (itemId: string) => void;
+  onDelete: () => void;
 }> = ({ foodItem, onClick, onMove, onDelete }) => {
   const moveItemConfig =
     foodItem.container === "fridge"
@@ -36,7 +39,7 @@ const FoodItemRenderer: FC<{
             }
           />
         </IonItemOption>
-        <IonItemOption color="danger" onClick={() => onDelete(foodItem.id)}>
+        <IonItemOption color="danger" onClick={() => onDelete()}>
           <IonIcon slot="icon-only" icon={trashOutline} />
         </IonItemOption>
       </IonItemOptions>

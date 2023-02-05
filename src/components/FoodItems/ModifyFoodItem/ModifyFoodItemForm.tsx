@@ -59,6 +59,8 @@ const ModifyFoodItemForm: FC<{
             placeholder="Enter item name"
             value={itemName}
             onIonChange={(e) => setItemName(e.target.value as string)}
+            autoCorrect="on"
+            autofocus
           />
         </IonItem>
         <IonItem lines="none">

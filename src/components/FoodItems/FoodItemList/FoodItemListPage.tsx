@@ -176,7 +176,7 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
               onMove={(destination) =>
                 confirmMoveFoodItem(foodItem, destination)
               }
-              onDelete={deleteFoodItem}
+              onDelete={() => deleteFoodItem(foodItem.id)}
             />
           ))}
         </IonList>
