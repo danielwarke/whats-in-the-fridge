@@ -70,11 +70,13 @@ const AppMenu: FC = () => {
             value={emoji}
             onIonChange={(e) => setEmoji(e.target.value as string)}
           >
-            {Object.entries(emojiMap).map(([key, emoji]) => (
-              <IonSelectOption key={key} value={key}>
-                {`${emoji} ${capitalizeFirstLetter(key)}`}
-              </IonSelectOption>
-            ))}
+            {Object.entries(emojiMap)
+              .sort()
+              .map(([key, emoji]) => (
+                <IonSelectOption key={key} value={key}>
+                  {`${emoji} ${capitalizeFirstLetter(key)}`}
+                </IonSelectOption>
+              ))}
           </IonSelect>
         </IonItem>
         <IonItem>
