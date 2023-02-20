@@ -9,6 +9,7 @@ import {
   IonHeader,
   IonItem,
   IonList,
+  IonLoading,
   IonMenuButton,
   IonModal,
   IonPage,
@@ -33,7 +34,7 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
   const { data: preferences = { emoji: "pizza" } } =
     api.user.preferences.useQuery();
 
-  const { data: foodItems = [] } = api.food.listItems.useQuery({
+  const { data: foodItems = [], isLoading } = api.food.listItems.useQuery({
     container,
   });
 
@@ -139,6 +140,7 @@ const FoodItemListPage: FC<{ container: "fridge" | "pantry" }> = ({
           placeholder={`Search the ${container}`}
           showClearButton="focus"
         />
+        <IonLoading isOpen={isLoading} />
         {foodItems.length === 0 && (
           <IonItem lines="none" className="mt-3">
             <IonText>
