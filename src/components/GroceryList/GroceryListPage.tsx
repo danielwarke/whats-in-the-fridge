@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../utils/api";
 import type { ItemReorderEventDetail } from "@ionic/react";
 import {
@@ -30,39 +30,30 @@ const GroceryListPage: FC = () => {
   const [presentToast] = useIonToast();
   const util = api.useContext();
 
-  const { data: groceryListItems = [] } = api.groceryList.list.useQuery();
+  const { data: apiGroceryList = [], isInitialLoading } =
+    api.groceryList.list.useQuery();
+
+  const overwriteList = useRef(true);
+  const [groceryListItems, setGroceryListItems] = useState<GroceryListItem[]>(
+    []
+  );
 
   const addItemMutation = api.groceryList.add.useMutation({
     onSuccess: (addedItem) => {
-      util.groceryList.list.setData(undefined, (list) =>
-        list ? [addedItem, ...list] : [addedItem]
-      );
+      setGroceryListItems((currentListItems) => [
+        addedItem,
+        ...currentListItems,
+      ]);
     },
   });
 
-  const updateItemMutation = api.groceryList.update.useMutation({
-    onSuccess: (updatedItem) => {
-      util.groceryList.list.setData(undefined, (list) => {
-        if (!list) return [updatedItem];
-        return list.map((listItem) => {
-          if (listItem.id === updatedItem.id) {
-            return updatedItem;
-          }
+  const updateItemMutation = api.groceryList.update.useMutation();
 
-          return listItem;
-        });
-      });
-    },
-  });
-
-  const reorderItemsMutation = api.groceryList.updateSortOrder.useMutation({
-    onSuccess: (updatedItems) => {
-      util.groceryList.list.setData(undefined, updatedItems);
-    },
-  });
+  const reorderItemsMutation = api.groceryList.updateSortOrder.useMutation();
 
   const deleteCompletedMutation = api.groceryList.deleteCompleted.useMutation({
     onSuccess: async (deletedItems) => {
+      overwriteList.current = true;
       await util.groceryList.list.invalidate();
       void presentToast(
         `Deleted ${deletedItems.count} item${
@@ -82,6 +73,14 @@ const GroceryListPage: FC = () => {
     );
   }, [groceryListItems, search]);
 
+  useEffect(() => {
+    if (isInitialLoading) return;
+    if (overwriteList.current) {
+      setGroceryListItems(apiGroceryList);
+      overwriteList.current = false;
+    }
+  }, [apiGroceryList, isInitialLoading]);
+
   function confirmDeleteCompletedItems() {
     void presentAlert({
       header: "Please Confirm",
@@ -98,10 +97,57 @@ const GroceryListPage: FC = () => {
     });
   }
 
+  function handleAddItem() {
+    addItemMutation.mutate({
+      name: "",
+    });
+  }
+
+  function handleRename(listItem: GroceryListItem, newName: string) {
+    setGroceryListItems((currentListItems) =>
+      currentListItems.map((item) => {
+        if (item.id === listItem.id) {
+          item.name = newName;
+        }
+
+        return item;
+      })
+    );
+
+    updateItemMutation.mutate({
+      id: listItem.id,
+      name: newName,
+      completed: listItem.completed,
+    });
+  }
+
+  function handleCompleteToggled(
+    listItem: GroceryListItem,
+    completed: boolean
+  ) {
+    setGroceryListItems((currentListItems) =>
+      currentListItems.map((item) => {
+        if (item.id === listItem.id) {
+          item.completed = completed;
+        }
+
+        return item;
+      })
+    );
+
+    updateItemMutation.mutate({
+      id: listItem.id,
+      name: listItem.name,
+      completed,
+    });
+  }
+
   function handleReorder(event: CustomEvent<ItemReorderEventDetail>) {
     const updatedItems = event.detail.complete(
       groceryListItems
     ) as GroceryListItem[];
+
+    setGroceryListItems(updatedItems);
 
     reorderItemsMutation.mutate({
       items: updatedItems.map((item, index) => ({
@@ -110,6 +156,10 @@ const GroceryListPage: FC = () => {
       })),
     });
   }
+
+  const hasCompletedItems = useMemo(() => {
+    return groceryListItems.some((listItem) => listItem.completed);
+  }, [groceryListItems]);
 
   return (
     <IonPage id="main-content">
@@ -120,15 +170,7 @@ const GroceryListPage: FC = () => {
           </IonButtons>
           <IonTitle>Grocery List</IonTitle>
           <IonButtons slot="end">
-            <IonButton
-              onClick={() =>
-                addItemMutation.mutate({
-                  name: "",
-                })
-              }
-            >
-              Add item
-            </IonButton>
+            <IonButton onClick={handleAddItem}>Add item</IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
@@ -163,19 +205,9 @@ const GroceryListPage: FC = () => {
             <GroceryListItemRenderer
               key={listItem.id}
               groceryListItem={listItem}
-              onRenamed={(newName) =>
-                updateItemMutation.mutate({
-                  id: listItem.id,
-                  name: newName,
-                  completed: listItem.completed,
-                })
-              }
+              onRenamed={(newName) => handleRename(listItem, newName)}
               onCompleteToggled={(completed) =>
-                updateItemMutation.mutate({
-                  id: listItem.id,
-                  name: listItem.name,
-                  completed,
-                })
+                handleCompleteToggled(listItem, completed)
               }
             />
           ))}
@@ -183,7 +215,7 @@ const GroceryListPage: FC = () => {
         <IonFab slot="fixed" vertical="bottom" horizontal="end">
           <IonFabButton
             color="danger"
-            disabled={!groceryListItems.some((listItem) => listItem.completed)}
+            disabled={!hasCompletedItems}
             onClick={confirmDeleteCompletedItems}
           >
             <IonIcon icon={trashOutline} />
