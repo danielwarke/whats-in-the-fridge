@@ -48,7 +48,7 @@ const GroceryListPage: FC = () => {
           (item) => item.id === focusedId
         );
 
-        if (focusedItemIdx) {
+        if (focusedItemIdx > -1) {
           updatedListItems.splice(focusedItemIdx + 1, 0, addedItem);
         } else {
           updatedListItems.push(addedItem);
