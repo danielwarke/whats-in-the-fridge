@@ -37,13 +37,26 @@ const GroceryListPage: FC = () => {
   const [groceryListItems, setGroceryListItems] = useState<GroceryListItem[]>(
     []
   );
+  const [focusedId, setFocusedId] = useState("");
 
   const addItemMutation = api.groceryList.add.useMutation({
     onSuccess: (addedItem) => {
-      setGroceryListItems((currentListItems) => [
-        addedItem,
-        ...currentListItems,
-      ]);
+      setGroceryListItems((currentListItems) => {
+        const updatedListItems = [...currentListItems];
+
+        const focusedItemIdx = updatedListItems.findIndex(
+          (item) => item.id === focusedId
+        );
+
+        if (focusedItemIdx) {
+          updatedListItems.splice(focusedItemIdx + 1, 0, addedItem);
+        } else {
+          updatedListItems.push(addedItem);
+        }
+
+        return updatedListItems;
+      });
+      setFocusedId(addedItem.id);
     },
   });
 
@@ -209,6 +222,9 @@ const GroceryListPage: FC = () => {
               onCompleteToggled={(completed) =>
                 handleCompleteToggled(listItem, completed)
               }
+              onFocus={() => setFocusedId(listItem.id)}
+              isFocused={listItem.id === focusedId}
+              onEnterKey={handleAddItem}
             />
           ))}
         </IonReorderGroup>
