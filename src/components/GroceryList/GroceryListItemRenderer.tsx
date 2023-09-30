@@ -40,7 +40,6 @@ const GroceryListItemRenderer: FC<{
         disabled={completed || undefined}
         value={name}
         onIonInput={(e) => onRenamed(e.target.value as string)}
-        debounce={300}
         onIonFocus={onFocus}
         onKeyUp={(e) => {
           if (e.key === "Enter") {
